@@ -1042,7 +1042,9 @@ function renderMC(q) {
   const dmode = getDMode();
   const { correct, options } = buildMCOptions(q, QUIZ.pool, dmode);
   const host = $("#answerMC");
+  const hasHanziChoices = /[\u3400-\u9fff]/.test(correct);
   host.innerHTML = "";
+  host.classList.toggle("hanziChoices", hasHanziChoices);
   options.forEach((opt, i) => {
     const b = document.createElement("button");
     b.className = "choice";
