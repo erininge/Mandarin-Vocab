@@ -465,13 +465,14 @@ function setVocabRowEditing(row, editing) {
   }
 }
 
-function updateVocabRowDisplay(row, item, displayMode) {
+function updateVocabRowDisplay(row, item) {
   const jpEl = row.querySelector(".jpDisplayText");
+  const pyEl = row.querySelector(".pinyinDisplayText");
   const enEl = row.querySelector(".enDisplayText");
   if (jpEl) {
-    const mode = isHanziOverride(item.id) ? "kanji" : displayMode;
-    jpEl.textContent = jpDisplay(item, mode);
+    jpEl.textContent = item.jp_kanji || item.jp_kana || "";
   }
+  if (pyEl) pyEl.textContent = item.jp_kana || "—";
   if (enEl) enEl.textContent = item.en || "";
 }
 
@@ -1073,7 +1074,6 @@ function endQuiz() {
 function buildVocabUI() {
   const starOnly = $("#vStarOnly").checked;
   const lessonFilter = $("#vLessonFilter").value;
-  const display = $("#vDisplay").value;
   const q = ($("#vSearch").value || "").trim();
 
   let rows = ITEMS.slice();
@@ -1111,15 +1111,13 @@ function buildVocabUI() {
     const tr = document.createElement("tr");
     tr.dataset.id = it.id;
     const starOn = isStarred(it.id);
-    const kanjiOn = isHanziOverride(it.id);
-    const rowDisplay = kanjiOn ? "kanji" : display;
     const audioId = audioIdForItem(it);
     tr.innerHTML = `
       <td><button class="starBtn ${starOn ? "on" : ""}" data-id="${it.id}">${starOn ? "⭐" : "☆"}</button></td>
-      <td><button class="kanjiBtn ${kanjiOn ? "on" : ""}" data-id="${it.id}" title="Toggle Hanzi-only for this word">${kanjiOn ? "汉" : "拼"}</button></td>
       <td>
         <div class="vocabView">
-          <div class="jpDisplayText" style="font-weight:800;">${jpDisplay(it, rowDisplay)}</div>
+          <div class="jpDisplayText" style="font-weight:800;">${it.jp_kanji || it.jp_kana || ""}</div>
+          <div class="hint pinyinDisplayText">${it.jp_kana || "—"}</div>
           <div class="hint audioHint">${audioId}</div>
         </div>
         <div class="vocabEdit hidden">
@@ -1178,21 +1176,6 @@ function buildVocabUI() {
     });
   });
 
-  host.querySelectorAll(".kanjiBtn").forEach(b => {
-    b.addEventListener("click", () => {
-      const id = b.getAttribute("data-id");
-      const on = toggleHanziOverride(id);
-      b.textContent = on ? "漢" : "かな";
-      b.classList.toggle("on", on);
-      const cell = b.closest("tr")?.querySelector(".jpDisplayText");
-      if (cell) {
-        const item = ITEMS_BY_ID.get(id);
-        const mode = on ? "kanji" : display;
-        cell.textContent = jpDisplay(item, mode);
-      }
-    });
-  });
-
   host.querySelectorAll(".editBtn").forEach(b => {
     b.addEventListener("click", () => {
       const id = b.getAttribute("data-id");
@@ -1234,7 +1217,7 @@ function buildVocabUI() {
       item.en = next.en;
       VOCAB_EDITS[id] = next;
       saveVocabEdits();
-      updateVocabRowDisplay(row, item, display);
+      updateVocabRowDisplay(row, item);
       setVocabRowEditing(row, false);
       updateCurrentAudioListIfOpen();
       renderStats();
@@ -1392,13 +1375,11 @@ function wireUI() {
   $("#vSearch").addEventListener("input", buildVocabUI);
   $("#vLessonFilter").addEventListener("change", buildVocabUI);
   $("#vStarOnly").addEventListener("change", buildVocabUI);
-  $("#vDisplay").addEventListener("change", buildVocabUI);
   $("#vSort").addEventListener("change", buildVocabUI);
   $("#vReset").addEventListener("click", () => {
     $("#vSearch").value = "";
     $("#vLessonFilter").value = "__all__";
     $("#vStarOnly").checked = false;
-    $("#vDisplay").value = "kana";
     $("#vSort").value = "default";
     buildVocabUI();
   });
