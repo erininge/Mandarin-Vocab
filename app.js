@@ -1,6 +1,6 @@
-/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.1) */
+/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.2) */
 
-const APP_VERSION = "V1.1";
+const APP_VERSION = "V1.2";
 const STORAGE = {
   stars: "hsk1_stars_v1_1",
   settings: "hsk1_settings_v1_1",
@@ -700,13 +700,25 @@ function buildLessonUI() {
     updateLessonHint();
     buildVocabUI();
     updateQuestionCountUI();
+    updateToneHint();
     updateCurrentAudioListIfOpen();
   });
   updateLessonHint();
   updateQuestionCountUI();
+  updateToneHint();
 
   const sel = $("#vLessonFilter");
   sel.innerHTML = `<option value="__all__">All lessons</option>` + LESSONS.map(l => `<option value="${l.code}">${l.name}</option>`).join("");
+}
+
+
+function updateToneHint() {
+  const pool = currentPool();
+  const starOnly = $("#toneStarredOnly")?.checked;
+  const playable = starOnly ? pool.filter((it) => isStarred(it.id)).length : pool.length;
+  const audioState = SETTINGS.audioOn ? "Audio on" : "Audio off";
+  const hint = $("#toneHint");
+  if (hint) hint.textContent = `${playable} playable item(s) • Uses your Study lesson selection • ${audioState}`;
 }
 
 function updateLessonHint() {
@@ -726,19 +738,18 @@ function updateListeningAvailability() {
   const listenEn = $("#qListenEN");
   const listenJp = $("#qListenJP");
   const listenMixed = $("#qListenMixed");
-  const toneListen = $("#qToneListen");
   listenEn.disabled = !on;
   listenJp.disabled = !on;
   if (listenMixed) listenMixed.disabled = !on;
-  if (toneListen) toneListen.disabled = !on;
   if (!on) {
     const select = $("#qModeSelect");
-    if (select.value.startsWith("listen") || select.value === "mixedlisten" || select.value === "tonelisten") {
+    if (select.value.startsWith("listen") || select.value === "mixedlisten") {
       select.value = "mixed";
     }
   }
   updateQModeDependencies();
   updateAudioUI();
+  updateToneHint();
 }
 
 function isToneListenMode(mode) {
@@ -856,7 +867,7 @@ async function playItemAudio(item) {
 }
 
 function showView(view) {
-  for (const v of ["study","vocab","stats","settings"]) {
+  for (const v of ["study","tone","vocab","stats","settings"]) {
     const sec = document.getElementById(`view-${v}`);
     sec.classList.toggle("hidden", v !== view);
     document.querySelector(`.navBtn[data-view='${v}']`).classList.toggle("active", v === view);
@@ -992,7 +1003,7 @@ function setQuizVisibility(active) {
   $("#studySetup").classList.toggle("hidden", active);
 }
 
-function startQuiz(forceStarredOnly=false) {
+function startQuiz(forceStarredOnly=false, overrides={}) {
   const pool0 = currentPool();
   let pool = pool0;
 
@@ -1001,16 +1012,17 @@ function startQuiz(forceStarredOnly=false) {
     toast("No items in your selected set.");
     return;
   }
-  const useAuto = $("#qAuto").checked;
+  const useAuto = overrides.useAuto ?? $("#qAuto").checked;
+  const countValue = overrides.qCount ?? Number($("#qCount")?.value || 20);
   const qCount = useAuto
     ? pool.length
-    : Math.max(1, Math.min(500, Number($("#qCount").value || 20)));
+    : Math.max(1, Math.min(500, countValue));
   const maxCount = Math.min(qCount, pool.length);
   if (qCount > pool.length) {
     toast(`Only ${pool.length} items available — quiz set to ${pool.length}.`);
   }
-  const qmode = getQMode();
-  const atype = getAType();
+  const qmode = overrides.qmode || getQMode();
+  const atype = overrides.atype || getAType();
 
   const questions = shuffle(pool).slice(0, maxCount).map(it => makeQuestion(it, qmode, atype));
 
@@ -1027,6 +1039,23 @@ function startQuiz(forceStarredOnly=false) {
 
   setQuizVisibility(true);
   nextQuestion();
+}
+
+
+function startToneQuiz() {
+  if (!SETTINGS.audioOn) {
+    toast("Turn on Audio in Settings to play Tone Game.");
+    return;
+  }
+  const useAuto = $("#toneAuto")?.checked ?? true;
+  const qCount = Number($("#toneCount")?.value || 20);
+  const starredOnly = $("#toneStarredOnly")?.checked ?? false;
+  startQuiz(starredOnly, {
+    qmode: "tonelisten",
+    atype: "mc",
+    useAuto,
+    qCount
+  });
 }
 
 function setStarButton(item) {
@@ -1395,22 +1424,26 @@ function wireUI() {
   $("#btnSelectAll").addEventListener("click", () => {
     $$("#lessonList input[type=checkbox]").forEach(x => x.checked = true);
     refreshHeaderCounts(); updateLessonHint(); buildVocabUI(); updateQuestionCountUI();
+    updateToneHint();
     updateCurrentAudioListIfOpen();
   });
   $("#btnClearAll").addEventListener("click", () => {
     $$("#lessonList input[type=checkbox]").forEach(x => x.checked = false);
     refreshHeaderCounts(); updateLessonHint(); buildVocabUI(); updateQuestionCountUI();
+    updateToneHint();
     updateCurrentAudioListIfOpen();
   });
   $("#btnStarredOnly").addEventListener("click", () => {
     $$("#lessonList input[type=checkbox]").forEach(x => x.checked = true);
     $("#filterStarredOnly").checked = true;
     refreshHeaderCounts(); updateLessonHint(); buildVocabUI(); updateQuestionCountUI();
+    updateToneHint();
     updateCurrentAudioListIfOpen();
   });
 
   $("#btnStart").addEventListener("click", () => startQuiz(false));
   $("#btnPracticeStarred").addEventListener("click", () => startQuiz(true));
+  $("#btnStartTone")?.addEventListener("click", startToneQuiz);
 
   $("#btnReplay").addEventListener("click", () => {
     if (!QUIZ.current) return;
@@ -1479,6 +1512,7 @@ function wireUI() {
     updateLessonHint();
     buildVocabUI();
     updateQuestionCountUI();
+    updateToneHint();
     updateCurrentAudioListIfOpen();
   });
 
