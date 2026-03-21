@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "shì",
+    "jp_kanji": "是",
+    "en": "to be",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_001"
+  },
+  {
+    "jp_kana": "shū",
+    "jp_kanji": "书",
+    "en": "book",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_002"
+  },
+  {
+    "jp_kana": "shuǐ",
+    "jp_kanji": "水",
+    "en": "water",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_003"
+  },
+  {
+    "jp_kana": "shuǐguǒ",
+    "jp_kanji": "水果",
+    "en": "fruit",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_004"
+  },
+  {
+    "jp_kana": "shuìjiào",
+    "jp_kanji": "睡觉",
+    "en": "to sleep",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_005"
+  },
+  {
+    "jp_kana": "shuōhuà",
+    "jp_kanji": "说话",
+    "en": "to speak; to talk",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_006"
+  },
+  {
+    "jp_kana": "sì",
+    "jp_kanji": "四",
+    "en": "four",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_007"
+  },
+  {
+    "jp_kana": "suì",
+    "jp_kanji": "岁",
+    "en": "years old",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_008"
+  },
+  {
+    "jp_kana": "tā",
+    "jp_kanji": "他",
+    "en": "he",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_009"
+  },
+  {
+    "jp_kana": "tā",
+    "jp_kanji": "她",
+    "en": "she",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_010"
+  },
+  {
+    "jp_kana": "tài",
+    "jp_kanji": "太",
+    "en": "too; very",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_011"
+  },
+  {
+    "jp_kana": "tiānqì",
+    "jp_kanji": "天气",
+    "en": "weather",
+    "lesson": "HSK 1 • Lesson 9",
+    "default_starred": false,
+    "id": "hsk1_l9_012"
+  }
+]

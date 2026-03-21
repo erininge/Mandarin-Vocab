@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "duōshǎo",
+    "jp_kanji": "多少",
+    "en": "how many; how much",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_001"
+  },
+  {
+    "jp_kana": "érzi",
+    "jp_kanji": "儿子",
+    "en": "son",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_002"
+  },
+  {
+    "jp_kana": "èr",
+    "jp_kanji": "二",
+    "en": "two",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_003"
+  },
+  {
+    "jp_kana": "fànguǎn",
+    "jp_kanji": "饭馆",
+    "en": "restaurant",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_004"
+  },
+  {
+    "jp_kana": "fēijī",
+    "jp_kanji": "飞机",
+    "en": "airplane",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_005"
+  },
+  {
+    "jp_kana": "fēnzhōng",
+    "jp_kanji": "分钟",
+    "en": "minute",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_006"
+  },
+  {
+    "jp_kana": "gāoxìng",
+    "jp_kanji": "高兴",
+    "en": "happy; glad",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_007"
+  },
+  {
+    "jp_kana": "gè",
+    "jp_kanji": "个",
+    "en": "general classifier",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_008"
+  },
+  {
+    "jp_kana": "gōngzuò",
+    "jp_kanji": "工作",
+    "en": "job; work",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_009"
+  },
+  {
+    "jp_kana": "gǒu",
+    "jp_kanji": "狗",
+    "en": "dog",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_010"
+  },
+  {
+    "jp_kana": "hànyǔ",
+    "jp_kanji": "汉语",
+    "en": "Chinese language",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_011"
+  },
+  {
+    "jp_kana": "hǎo",
+    "jp_kanji": "好",
+    "en": "good",
+    "lesson": "HSK 1 • Lesson 3",
+    "default_starred": false,
+    "id": "hsk1_l3_012"
+  }
+]

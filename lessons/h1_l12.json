@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "yīshēng",
+    "jp_kanji": "医生",
+    "en": "doctor",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_001"
+  },
+  {
+    "jp_kana": "yīyuàn",
+    "jp_kanji": "医院",
+    "en": "hospital",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_002"
+  },
+  {
+    "jp_kana": "yǐzi",
+    "jp_kanji": "椅子",
+    "en": "chair",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_003"
+  },
+  {
+    "jp_kana": "yǒu",
+    "jp_kanji": "有",
+    "en": "to have; there is",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_004"
+  },
+  {
+    "jp_kana": "yuè",
+    "jp_kanji": "月",
+    "en": "month; moon",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_005"
+  },
+  {
+    "jp_kana": "zài",
+    "jp_kanji": "在",
+    "en": "at; in",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_006"
+  },
+  {
+    "jp_kana": "zàijiàn",
+    "jp_kanji": "再见",
+    "en": "goodbye",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_007"
+  },
+  {
+    "jp_kana": "zěnme",
+    "jp_kanji": "怎么",
+    "en": "how",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_008"
+  },
+  {
+    "jp_kana": "zěnmeyàng",
+    "jp_kanji": "怎么样",
+    "en": "how about; how is it",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_009"
+  },
+  {
+    "jp_kana": "zhèr",
+    "jp_kanji": "这儿",
+    "en": "here",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_010"
+  },
+  {
+    "jp_kana": "zhōngguó",
+    "jp_kanji": "中国",
+    "en": "China",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_011"
+  },
+  {
+    "jp_kana": "zhōngwǔ",
+    "jp_kanji": "中午",
+    "en": "noon",
+    "lesson": "HSK 1 • Lesson 12",
+    "default_starred": false,
+    "id": "hsk1_l12_012"
+  }
+]

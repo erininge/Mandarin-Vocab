@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "dǎdiànhuà",
+    "jp_kanji": "打电话",
+    "en": "to make a telephone call",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_001"
+  },
+  {
+    "jp_kana": "dà",
+    "jp_kanji": "大",
+    "en": "big",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_002"
+  },
+  {
+    "jp_kana": "de",
+    "jp_kanji": "的",
+    "en": "possessive particle",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_003"
+  },
+  {
+    "jp_kana": "diǎn",
+    "jp_kanji": "点",
+    "en": "o’clock; a little",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_004"
+  },
+  {
+    "jp_kana": "diànnǎo",
+    "jp_kanji": "电脑",
+    "en": "computer",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_005"
+  },
+  {
+    "jp_kana": "diànshì",
+    "jp_kanji": "电视",
+    "en": "television; TV",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_006"
+  },
+  {
+    "jp_kana": "diànyǐng",
+    "jp_kanji": "电影",
+    "en": "movie; film",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_007"
+  },
+  {
+    "jp_kana": "dōngxi",
+    "jp_kanji": "东西",
+    "en": "thing; stuff",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_008"
+  },
+  {
+    "jp_kana": "dōu",
+    "jp_kanji": "都",
+    "en": "all; both",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_009"
+  },
+  {
+    "jp_kana": "dú",
+    "jp_kanji": "读",
+    "en": "to read",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_010"
+  },
+  {
+    "jp_kana": "duìbuqǐ",
+    "jp_kanji": "对不起",
+    "en": "I'm sorry; excuse me",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_011"
+  },
+  {
+    "jp_kana": "duō",
+    "jp_kanji": "多",
+    "en": "many; much",
+    "lesson": "HSK 1 • Lesson 2",
+    "default_starred": false,
+    "id": "hsk1_l2_012"
+  }
+]

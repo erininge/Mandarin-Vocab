@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "rén",
+    "jp_kanji": "人",
+    "en": "person",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_001"
+  },
+  {
+    "jp_kana": "rènshi",
+    "jp_kanji": "认识",
+    "en": "to know; to recognize",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_002"
+  },
+  {
+    "jp_kana": "rì",
+    "jp_kanji": "日",
+    "en": "day; date",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_003"
+  },
+  {
+    "jp_kana": "sān",
+    "jp_kanji": "三",
+    "en": "three",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_004"
+  },
+  {
+    "jp_kana": "shāngdiàn",
+    "jp_kanji": "商店",
+    "en": "store; shop",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_005"
+  },
+  {
+    "jp_kana": "shàng",
+    "jp_kanji": "上",
+    "en": "up; on",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_006"
+  },
+  {
+    "jp_kana": "shàngwǔ",
+    "jp_kanji": "上午",
+    "en": "morning",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_007"
+  },
+  {
+    "jp_kana": "shǎo",
+    "jp_kanji": "少",
+    "en": "few; little",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_008"
+  },
+  {
+    "jp_kana": "shéi",
+    "jp_kanji": "谁",
+    "en": "who",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_009"
+  },
+  {
+    "jp_kana": "shénme",
+    "jp_kanji": "什么",
+    "en": "what",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_010"
+  },
+  {
+    "jp_kana": "shí",
+    "jp_kanji": "十",
+    "en": "ten",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_011"
+  },
+  {
+    "jp_kana": "shíhou",
+    "jp_kanji": "时候",
+    "en": "time; moment",
+    "lesson": "HSK 1 • Lesson 8",
+    "default_starred": false,
+    "id": "hsk1_l8_012"
+  }
+]

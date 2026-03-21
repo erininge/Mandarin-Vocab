@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "kāi",
+    "jp_kanji": "开",
+    "en": "to open; to turn on",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_001"
+  },
+  {
+    "jp_kana": "kàn",
+    "jp_kanji": "看",
+    "en": "to look; to see; to watch",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_002"
+  },
+  {
+    "jp_kana": "kànjiàn",
+    "jp_kanji": "看见",
+    "en": "to see; to catch sight of",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_003"
+  },
+  {
+    "jp_kana": "kuài",
+    "jp_kanji": "块",
+    "en": "piece; yuan (colloquial)",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_004"
+  },
+  {
+    "jp_kana": "lái",
+    "jp_kanji": "来",
+    "en": "to come",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_005"
+  },
+  {
+    "jp_kana": "lǎoshī",
+    "jp_kanji": "老师",
+    "en": "teacher",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_006"
+  },
+  {
+    "jp_kana": "le",
+    "jp_kanji": "了",
+    "en": "completed action marker",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_007"
+  },
+  {
+    "jp_kana": "lěng",
+    "jp_kanji": "冷",
+    "en": "cold",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_008"
+  },
+  {
+    "jp_kana": "lǐ",
+    "jp_kanji": "里",
+    "en": "inside",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_009"
+  },
+  {
+    "jp_kana": "líng",
+    "jp_kanji": "零",
+    "en": "zero",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_010"
+  },
+  {
+    "jp_kana": "liù",
+    "jp_kanji": "六",
+    "en": "six",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_011"
+  },
+  {
+    "jp_kana": "māma",
+    "jp_kanji": "妈妈",
+    "en": "mother",
+    "lesson": "HSK 1 • Lesson 5",
+    "default_starred": false,
+    "id": "hsk1_l5_012"
+  }
+]

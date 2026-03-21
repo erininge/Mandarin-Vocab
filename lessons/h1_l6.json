@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "ma",
+    "jp_kanji": "吗",
+    "en": "question particle",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_001"
+  },
+  {
+    "jp_kana": "mǎi",
+    "jp_kanji": "买",
+    "en": "to buy",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_002"
+  },
+  {
+    "jp_kana": "māo",
+    "jp_kanji": "猫",
+    "en": "cat",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_003"
+  },
+  {
+    "jp_kana": "méi",
+    "jp_kanji": "没",
+    "en": "not; have not",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_004"
+  },
+  {
+    "jp_kana": "méiguānxi",
+    "jp_kanji": "没关系",
+    "en": "it doesn't matter",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_005"
+  },
+  {
+    "jp_kana": "mǐfàn",
+    "jp_kanji": "米饭",
+    "en": "cooked rice",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_006"
+  },
+  {
+    "jp_kana": "míngtiān",
+    "jp_kanji": "明天",
+    "en": "tomorrow",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_007"
+  },
+  {
+    "jp_kana": "míngzi",
+    "jp_kanji": "名字",
+    "en": "name",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_008"
+  },
+  {
+    "jp_kana": "nǎr",
+    "jp_kanji": "哪儿",
+    "en": "where",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_009"
+  },
+  {
+    "jp_kana": "nàr",
+    "jp_kanji": "那儿",
+    "en": "there",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_010"
+  },
+  {
+    "jp_kana": "ne",
+    "jp_kanji": "呢",
+    "en": "question particle",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_011"
+  },
+  {
+    "jp_kana": "néng",
+    "jp_kanji": "能",
+    "en": "can; be able to",
+    "lesson": "HSK 1 • Lesson 6",
+    "default_starred": false,
+    "id": "hsk1_l6_012"
+  }
+]

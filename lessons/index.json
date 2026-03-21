@@ -1,0 +1,84 @@
+{
+  "course": "HSK1",
+  "version": "1.0",
+  "lessons": [
+    {
+      "code": "h1_l1",
+      "name": "HSK 1 • Lesson 1",
+      "file": "lessons/h1_l1.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l2",
+      "name": "HSK 1 • Lesson 2",
+      "file": "lessons/h1_l2.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l3",
+      "name": "HSK 1 • Lesson 3",
+      "file": "lessons/h1_l3.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l4",
+      "name": "HSK 1 • Lesson 4",
+      "file": "lessons/h1_l4.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l5",
+      "name": "HSK 1 • Lesson 5",
+      "file": "lessons/h1_l5.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l6",
+      "name": "HSK 1 • Lesson 6",
+      "file": "lessons/h1_l6.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l7",
+      "name": "HSK 1 • Lesson 7",
+      "file": "lessons/h1_l7.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l8",
+      "name": "HSK 1 • Lesson 8",
+      "file": "lessons/h1_l8.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l9",
+      "name": "HSK 1 • Lesson 9",
+      "file": "lessons/h1_l9.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l10",
+      "name": "HSK 1 • Lesson 10",
+      "file": "lessons/h1_l10.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l11",
+      "name": "HSK 1 • Lesson 11",
+      "file": "lessons/h1_l11.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l12",
+      "name": "HSK 1 • Lesson 12",
+      "file": "lessons/h1_l12.json",
+      "count": 12
+    },
+    {
+      "code": "h1_l13",
+      "name": "HSK 1 • Lesson 13",
+      "file": "lessons/h1_l13.json",
+      "count": 6
+    }
+  ]
+}

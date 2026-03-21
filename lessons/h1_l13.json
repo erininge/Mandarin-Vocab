@@ -1,0 +1,50 @@
+[
+  {
+    "jp_kana": "zhù",
+    "jp_kanji": "住",
+    "en": "to live",
+    "lesson": "HSK 1 • Lesson 13",
+    "default_starred": false,
+    "id": "hsk1_l13_001"
+  },
+  {
+    "jp_kana": "zhuōzi",
+    "jp_kanji": "桌子",
+    "en": "table; desk",
+    "lesson": "HSK 1 • Lesson 13",
+    "default_starred": false,
+    "id": "hsk1_l13_002"
+  },
+  {
+    "jp_kana": "zì",
+    "jp_kanji": "字",
+    "en": "character; word",
+    "lesson": "HSK 1 • Lesson 13",
+    "default_starred": false,
+    "id": "hsk1_l13_003"
+  },
+  {
+    "jp_kana": "zuótiān",
+    "jp_kanji": "昨天",
+    "en": "yesterday",
+    "lesson": "HSK 1 • Lesson 13",
+    "default_starred": false,
+    "id": "hsk1_l13_004"
+  },
+  {
+    "jp_kana": "zuò",
+    "jp_kanji": "坐",
+    "en": "to sit; to take (transport)",
+    "lesson": "HSK 1 • Lesson 13",
+    "default_starred": false,
+    "id": "hsk1_l13_005"
+  },
+  {
+    "jp_kana": "zuò",
+    "jp_kanji": "做",
+    "en": "to do; to make",
+    "lesson": "HSK 1 • Lesson 13",
+    "default_starred": false,
+    "id": "hsk1_l13_006"
+  }
+]

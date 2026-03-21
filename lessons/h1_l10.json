@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "tīng",
+    "jp_kanji": "听",
+    "en": "to listen; to hear",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_001"
+  },
+  {
+    "jp_kana": "tóngxué",
+    "jp_kanji": "同学",
+    "en": "classmate",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_002"
+  },
+  {
+    "jp_kana": "wèi",
+    "jp_kanji": "喂",
+    "en": "hello (on phone)",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_003"
+  },
+  {
+    "jp_kana": "wǒ",
+    "jp_kanji": "我",
+    "en": "I; me",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_004"
+  },
+  {
+    "jp_kana": "wǒmen",
+    "jp_kanji": "我们",
+    "en": "we; us",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_005"
+  },
+  {
+    "jp_kana": "wǔ",
+    "jp_kanji": "五",
+    "en": "five",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_006"
+  },
+  {
+    "jp_kana": "xǐhuan",
+    "jp_kanji": "喜欢",
+    "en": "to like",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_007"
+  },
+  {
+    "jp_kana": "xià",
+    "jp_kanji": "下",
+    "en": "down; below",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_008"
+  },
+  {
+    "jp_kana": "xiàwǔ",
+    "jp_kanji": "下午",
+    "en": "afternoon",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_009"
+  },
+  {
+    "jp_kana": "xiàyǔ",
+    "jp_kanji": "下雨",
+    "en": "to rain",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_010"
+  },
+  {
+    "jp_kana": "xiānsheng",
+    "jp_kanji": "先生",
+    "en": "mister; sir",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_011"
+  },
+  {
+    "jp_kana": "xiànzài",
+    "jp_kanji": "现在",
+    "en": "now",
+    "lesson": "HSK 1 • Lesson 10",
+    "default_starred": false,
+    "id": "hsk1_l10_012"
+  }
+]

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1116" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css?f=v1.0" />
+  <title>Kat’s Mandarin Garden 🌸 — HSK 1</title>
+</head>
+<body>
+  <div id="videoBackground" class="video-background" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🌸</div>
+      <div class="brandText">
+        <div class="title">Kat’s Vocab Garden 🌸</div>
+        <div class="sub">HSK 1 • <span id="versionLabel">V1.0</span></div>
+      </div>
+    </div>
+
+    <div class="topActions">
+      <button class="btn subtle" id="btnAppRefresh" title="Check for updates and reload the app">Refresh / Update App</button>
+    </div>
+
+    <div class="counts">
+      <div class="pill">Total: <span id="countTotal">—</span></div>
+      <div class="pill">In set: <span id="countInSet">—</span></div>
+      <div class="pill">⭐ <span id="countStarred">—</span></div>
+    </div>
+
+    <nav class="nav">
+      <button class="navBtn" data-view="study">Study</button>
+      <button class="navBtn" data-view="vocab">View Vocab</button>
+      <button class="navBtn" data-view="stats">Stats</button>
+      <button class="navBtn" data-view="settings">Settings</button>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section id="view-study" class="view">
+      <div class="card" id="studySetup">
+        <div class="cardTitle">Study setup</div>
+
+        <div class="grid2">
+          <div>
+            <label class="label">Lessons</label>
+            <div id="lessonList" class="lessonList"></div>
+            <div class="row gap">
+              <button class="btn subtle" id="btnSelectAll">Select all</button>
+              <button class="btn subtle" id="btnClearAll">Clear</button>
+              <button class="btn subtle" id="btnStarredOnly">Starred only</button>
+            </div>
+            <div class="hint" id="lessonHint">—</div>
+          </div>
+
+          <div>
+            <label class="label" for="qModeSelect">Question mode</label>
+            <select id="qModeSelect" class="select block">
+              <option value="en2jp" selected>EN → 中文</option>
+              <option value="jp2en">中文 → EN</option>
+              <option value="mixed">Mixed</option>
+              <option value="mixedlisten" id="qListenMixed">Mixed listening</option>
+              <option value="listen2en" id="qListenEN">Listening → EN</option>
+              <option value="listen2jp" id="qListenJP">Listening → 中文</option>
+            </select>
+
+            <label class="label" for="aTypeSelect">Answer type</label>
+            <select id="aTypeSelect" class="select block">
+              <option value="mc" selected>Multiple choice</option>
+              <option value="type">Typing</option>
+              <option value="mixed">Mixed</option>
+            </select>
+
+            <label class="label" for="dModeSelect">Display mode</label>
+            <select id="dModeSelect" class="select block">
+              <option value="kana" selected>Pinyin</option>
+              <option value="kanji">Hanzi</option>
+              <option value="both">Both</option>
+            </select>
+
+            <div class="row gap">
+              <label class="chip"><input type="checkbox" id="filterStarredOnly"> Starred only</label>
+              <label class="chip"><input type="checkbox" id="qAuto" checked> AUTO</label>
+              <label class="chip">Questions: <input id="qCount" class="num" type="number" min="5" max="200" value="20"></label>
+            </div>
+
+            <div class="row gap">
+              <button class="btn primary" id="btnStart">Start</button>
+              <button class="btn" id="btnPracticeStarred">Practice ⭐</button>
+            </div>
+
+            <div class="hint">
+              Shortcuts: <kbd>Enter</kbd> submit/check, <kbd>1-4</kbd> pick choice, <kbd>`</kbd> star, <kbd>/</kbd> focus input, <kbd>=</kbd> replay.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="quizArea" class="quizStage hidden">
+        <div class="quizPanel">
+          <div class="quizTop">
+            <div class="quizMeta">
+              <div class="quizMetaLine">
+                <div class="quizCourse" id="quizCourse">HSK 1 • —</div>
+                <div class="quizProgress" id="quizProgress">—</div>
+              </div>
+              <div class="hint" id="quizSub">—</div>
+            </div>
+            <div class="quizActions">
+              <button class="btn subtle" id="btnReplay" title="Replay (=)">🔊</button>
+              <button class="btn subtle" id="btnToggleStar" title="Star (`)">☆</button>
+              <button class="btn subtle danger" id="btnEnd">Quit</button>
+            </div>
+          </div>
+
+          <div id="prompt" class="prompt">—</div>
+
+          <div id="answerMC" class="answers hidden"></div>
+
+          <div id="answerType" class="row gap hidden">
+            <input id="answerInput" class="input" type="text" placeholder="Type your answer…" autocomplete="off" autocapitalize="none" spellcheck="false" />
+            <button class="btn primary" id="btnSubmit">Submit</button>
+          </div>
+
+          <div id="feedback" class="feedback hidden"></div>
+
+          <div class="row gap quizFooter">
+            <button class="btn subtle" id="btnNext" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-vocab" class="view hidden">
+      <div class="card">
+        <div class="cardTitle">View vocab</div>
+        <div class="row wrap gap">
+          <input id="vSearch" class="input" type="text" placeholder="Search (EN / 中文 / Pinyin)..." />
+          <select id="vLessonFilter" class="select"></select>
+          <label class="chip"><input type="checkbox" id="vStarOnly"> Starred only</label>
+          <label class="chip">Display:
+            <select id="vDisplay" class="select inline">
+              <option value="kana">Pinyin</option>
+              <option value="kanji">Hanzi</option>
+              <option value="both">Both</option>
+            </select>
+          </label>
+          <label class="chip">Sort:
+            <select id="vSort" class="select inline">
+              <option value="default" selected>Default</option>
+              <option value="kanji_asc">Hanzi A→Z</option>
+              <option value="kanji_desc">Hanzi Z→A</option>
+            </select>
+          </label>
+          <button class="btn subtle" id="vReset">Reset</button>
+        </div>
+
+        <div class="hint" id="vCountHint">—</div>
+
+        <div class="tableWrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:48px;">⭐</th>
+                <th style="width:70px;">Hanzi</th>
+                <th>Chinese</th>
+                <th>EN</th>
+                <th style="width:140px;">Lesson</th>
+                <th style="width:60px;">🔊</th>
+                <th style="width:120px;">Edit</th>
+              </tr>
+            </thead>
+            <tbody id="vTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-stats" class="view hidden">
+      <div class="card">
+        <div class="cardTitle">Stats</div>
+        <div class="grid2">
+          <div class="statBox">
+            <div class="statNum" id="statTotalAttempts">—</div>
+            <div class="hint">Total attempts</div>
+          </div>
+          <div class="statBox">
+            <div class="statNum" id="statAccuracy">—</div>
+            <div class="hint">Accuracy</div>
+          </div>
+        </div>
+
+        <div class="cardTitle" style="margin-top:16px;">Most missed</div>
+        <div id="missList" class="missList">—</div>
+      </div>
+    </section>
+
+    <section id="view-settings" class="view hidden">
+      <div class="card">
+        <div class="cardTitle">Settings</div>
+        <div class="row wrap gap">
+          <label class="chip"><input type="checkbox" id="setAudioOn"> Audio on</label>
+          <label class="chip">Volume <input type="range" id="setVolume" min="0" max="1" step="0.01" value="0.9"></label>
+          <label class="chip"><input type="checkbox" id="setAutoplay"> Autoplay audio</label>
+          <label class="chip"><input type="checkbox" id="setSmartGrade" checked> Smart grading</label>
+          <label class="chip">Background Video
+            <select id="setBackgroundVideo" class="select inline">
+              <option value="off" selected>Off</option>
+              <option value="on">On</option>
+            </select>
+          </label>
+        </div>
+        <div class="hint" id="backgroundVideoHint">Enable the blossom background video behind the UI.</div>
+
+        <div class="cardTitle" style="margin-top:16px;">Audio folder</div>
+        <div class="hint">
+          Put your audio files in <code>/audio</code> named exactly <code>&lt;id&gt;.&lt;ext&gt;</code>.<br/>
+          Supported extensions: <code>.wav</code>, <code>.mp3</code>, <code>.m4a</code>, <code>.ogg</code>.<br/>
+          Example: <code>audio/hsk1_l1_001.wav</code> for the item with id <code>hsk1_l1_001</code>.
+        </div>
+
+        <div class="cardTitle" style="margin-top:16px;">Audio status</div>
+        <div class="row wrap gap">
+          <button class="btn subtle" id="btnAudioCheck">Audio self-check</button>
+          <div class="hint" id="audioCheckSummary">—</div>
+        </div>
+
+        <div class="cardTitle" style="margin-top:16px;">Current words audio</div>
+        <div class="row wrap gap">
+          <button class="btn subtle" id="btnCurrentAudioList">Open Current Words</button>
+          <label class="chip"><input type="checkbox" id="currentAudioMissingOnly"> Missing audio only</label>
+          <div class="hint" id="currentAudioSummary">—</div>
+        </div>
+        <div id="currentAudioList" class="audioList hidden">
+          <div class="audioListHeader row wrap gap">
+            <div class="hint" id="currentAudioMeta">—</div>
+            <button class="btn subtle" id="btnCloseCurrentAudio">Hide list</button>
+          </div>
+          <div id="currentAudioRows" class="audioRows"></div>
+        </div>
+
+        <div class="cardTitle" style="margin-top:16px;">Data</div>
+        <div class="row gap">
+          <button class="btn subtle" id="btnReloadData">Reload lessons</button>
+          <button class="btn subtle danger" id="btnResetStars">Reset stars</button>
+          <button class="btn subtle danger" id="btnResetStats">Reset stats</button>
+        </div>
+
+        <div class="hint" id="settingsHint">—</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js?f=v1.0?f=v6.7"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+[
+  {
+    "jp_kana": "ài",
+    "jp_kanji": "爱",
+    "en": "to love; affection; to be fond of; to like",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_001"
+  },
+  {
+    "jp_kana": "bā",
+    "jp_kanji": "八",
+    "en": "eight; 8",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_002"
+  },
+  {
+    "jp_kana": "bàba",
+    "jp_kanji": "爸爸",
+    "en": "father",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_003"
+  },
+  {
+    "jp_kana": "bēizi",
+    "jp_kanji": "杯子",
+    "en": "cup; glass",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_004"
+  },
+  {
+    "jp_kana": "běijīng",
+    "jp_kanji": "北京",
+    "en": "Beijing",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_005"
+  },
+  {
+    "jp_kana": "běn",
+    "jp_kanji": "本",
+    "en": "classifier for books",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_006"
+  },
+  {
+    "jp_kana": "bùkèqi",
+    "jp_kanji": "不客气",
+    "en": "you're welcome",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_007"
+  },
+  {
+    "jp_kana": "bù",
+    "jp_kanji": "不",
+    "en": "not; no",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_008"
+  },
+  {
+    "jp_kana": "cài",
+    "jp_kanji": "菜",
+    "en": "dish; vegetables",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_009"
+  },
+  {
+    "jp_kana": "chá",
+    "jp_kanji": "茶",
+    "en": "tea",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_010"
+  },
+  {
+    "jp_kana": "chī",
+    "jp_kanji": "吃",
+    "en": "to eat",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_011"
+  },
+  {
+    "jp_kana": "chūzūchē",
+    "jp_kanji": "出租车",
+    "en": "taxi",
+    "lesson": "HSK 1 • Lesson 1",
+    "default_starred": false,
+    "id": "hsk1_l1_012"
+  }
+]
