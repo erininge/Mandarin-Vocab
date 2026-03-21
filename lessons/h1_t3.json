@@ -1,0 +1,38 @@
+[
+  {
+    "jp_kana": "tāng",
+    "jp_kanji": "汤",
+    "en": "soup",
+    "lesson": "Tone Recognition • Lesson 3",
+    "tone_group": "tang",
+    "default_starred": false,
+    "id": "hsk1_t3_001"
+  },
+  {
+    "jp_kana": "táng",
+    "jp_kanji": "糖",
+    "en": "sugar",
+    "lesson": "Tone Recognition • Lesson 3",
+    "tone_group": "tang",
+    "default_starred": false,
+    "id": "hsk1_t3_002"
+  },
+  {
+    "jp_kana": "tǎng",
+    "jp_kanji": "躺",
+    "en": "to lie down",
+    "lesson": "Tone Recognition • Lesson 3",
+    "tone_group": "tang",
+    "default_starred": false,
+    "id": "hsk1_t3_003"
+  },
+  {
+    "jp_kana": "tàng",
+    "jp_kanji": "烫",
+    "en": "scalding hot",
+    "lesson": "Tone Recognition • Lesson 3",
+    "tone_group": "tang",
+    "default_starred": false,
+    "id": "hsk1_t3_004"
+  }
+]

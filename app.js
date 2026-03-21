@@ -1,13 +1,13 @@
-/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.0) */
+/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.1) */
 
-const APP_VERSION = "V1.0";
+const APP_VERSION = "V1.1";
 const STORAGE = {
-  stars: "hsk1_stars_v1",
-  settings: "hsk1_settings_v1",
-  stats: "hsk1_stats_v1",
-  kanjiOverrides: "hsk1_hanzi_overrides_v1",
-  vocabEdits: "hsk1_vocab_edits_v1",
-  seeded: "hsk1_seeded_v1"
+  stars: "hsk1_stars_v1_1",
+  settings: "hsk1_settings_v1_1",
+  stats: "hsk1_stats_v1_1",
+  kanjiOverrides: "hsk1_hanzi_overrides_v1_1",
+  vocabEdits: "hsk1_vocab_edits_v1_1",
+  seeded: "hsk1_seeded_v1_1"
 };
 
 const DEFAULT_SETTINGS = {
@@ -350,6 +350,7 @@ function applyBackgroundVideo(state) {
 }
 
 let LESSONS = [];
+let LESSON_NAME_TO_CODE = new Map();
 let ITEMS = [];
 let ITEMS_BY_ID = new Map();
 let VOCAB_EDITS = {};
@@ -477,6 +478,8 @@ function updateVocabRowDisplay(row, item) {
 }
 
 function lesson_code(lessonName) {
+  const normalized = (lessonName || "").toLowerCase().trim();
+  if (LESSON_NAME_TO_CODE.has(normalized)) return LESSON_NAME_TO_CODE.get(normalized);
   const lower = (lessonName || "").toLowerCase();
   const m = lower.match(/lesson\s*([0-9]+)/);
   if (m) return "h1_l" + m[1];
@@ -603,10 +606,11 @@ async function buildCurrentAudioList({ force = false } = {}) {
 async function loadData() {
   const fallbackLessons = [
     "h1_l1", "h1_l2", "h1_l3", "h1_l4", "h1_l5", "h1_l6", "h1_l7",
-    "h1_l8", "h1_l9", "h1_l10", "h1_l11", "h1_l12", "h1_l13"
+    "h1_l8", "h1_l9", "h1_l10", "h1_l11", "h1_l12", "h1_l13",
+    "h1_t1", "h1_t2", "h1_t3", "h1_t4", "h1_t5"
   ].map((code, idx) => ({
     code,
-    name: `HSK 1 • Lesson ${idx + 1}`,
+    name: idx < 13 ? `HSK 1 • Lesson ${idx + 1}` : `Tone Recognition • Lesson ${idx - 12}`,
     file: `./lessons/${code}.json`
   }));
 
@@ -638,6 +642,7 @@ async function loadData() {
   }
 
   LESSONS = Array.isArray(idx?.lessons) && idx.lessons.length ? idx.lessons : fallbackLessons;
+  LESSON_NAME_TO_CODE = new Map(LESSONS.map((l) => [String(l.name || "").toLowerCase().trim(), l.code]));
   const all = [];
   for (const l of LESSONS) {
     const candidates = toLessonFileCandidates(l.file);
@@ -721,16 +726,32 @@ function updateListeningAvailability() {
   const listenEn = $("#qListenEN");
   const listenJp = $("#qListenJP");
   const listenMixed = $("#qListenMixed");
+  const toneListen = $("#qToneListen");
   listenEn.disabled = !on;
   listenJp.disabled = !on;
   if (listenMixed) listenMixed.disabled = !on;
+  if (toneListen) toneListen.disabled = !on;
   if (!on) {
     const select = $("#qModeSelect");
-    if (select.value.startsWith("listen") || select.value === "mixedlisten") {
+    if (select.value.startsWith("listen") || select.value === "mixedlisten" || select.value === "tonelisten") {
       select.value = "mixed";
     }
   }
+  updateQModeDependencies();
   updateAudioUI();
+}
+
+function isToneListenMode(mode) {
+  return mode === "tonelisten";
+}
+
+function updateQModeDependencies() {
+  const qmode = getQMode();
+  const atype = $("#aTypeSelect");
+  if (!atype) return;
+  const toneMode = isToneListenMode(qmode);
+  if (toneMode) atype.value = "mc";
+  atype.disabled = toneMode;
 }
 
 function getQMode() {
@@ -865,6 +886,7 @@ function makeQuestion(item, qmode, atype) {
     qm = allowed[Math.floor(Math.random()*allowed.length)];
   }
   let am = atype;
+  if (isToneListenMode(qm)) am = "mc";
   if (am === "mixed") am = Math.random() < 0.5 ? "mc" : "type";
   return { item, qmode: qm, atype: am };
 }
@@ -873,12 +895,16 @@ function promptTextForQuestion(q, dmode) {
   const it = q.item;
   if (q.qmode === "en2jp") return it.en;
   if (q.qmode === "jp2en") return jpDisplay(it, displayModeForItem(it, dmode));
+  if (isToneListenMode(q.qmode)) return "🎧 Tone listening: which word did you hear?";
   if (q.qmode.startsWith("listen")) return "🎧 Listening… (press =)";
   return it.en;
 }
 
 function correctAnswerText(q, dmode) {
   const it = q.item;
+  if (isToneListenMode(q.qmode)) {
+    return `${it.jp_kana} • ${it.jp_kanji} — ${it.en}`;
+  }
   if (q.qmode === "en2jp" || q.qmode === "listen2jp") {
     return jpDisplay(it, displayModeForItem(it, dmode));
   }
@@ -887,6 +913,19 @@ function correctAnswerText(q, dmode) {
 
 function buildMCOptions(q, pool, dmode) {
   const it = q.item;
+  if (isToneListenMode(q.qmode)) {
+    const toneGroup = String(it.tone_group || "").trim();
+    const groupPool = toneGroup
+      ? pool.filter((x) => String(x.tone_group || "").trim() === toneGroup)
+      : [];
+    const candidates = groupPool.length >= 2 ? groupPool : pool;
+    const correct = `${it.jp_kana} • ${it.jp_kanji} — ${it.en}`;
+    const mapped = candidates
+      .filter((x) => x.id !== it.id)
+      .map((x) => `${x.jp_kana} • ${x.jp_kanji} — ${x.en}`);
+    const distractors = sample(uniq(mapped.filter(Boolean)), 3);
+    return { correct, options: shuffle([correct, ...distractors]) };
+  }
   const isJPAnswer = (q.qmode === "en2jp" || q.qmode === "listen2jp");
   const correct = isJPAnswer ? jpDisplay(it, displayModeForItem(it, dmode)) : it.en;
 
@@ -997,7 +1036,7 @@ function setStarButton(item) {
 
 function maybeAutoplay(q) {
   if (!SETTINGS.autoplay) return;
-  const isChineseQuestion = q.qmode === "jp2en" || q.qmode.startsWith("listen");
+  const isChineseQuestion = q.qmode === "jp2en" || q.qmode.startsWith("listen") || isToneListenMode(q.qmode);
   if (isChineseQuestion) playItemAudio(q.item);
 }
 
@@ -1445,6 +1484,9 @@ function wireUI() {
 
   $("#qAuto").addEventListener("change", () => {
     updateQuestionCountUI();
+  });
+  $("#qModeSelect").addEventListener("change", () => {
+    updateQModeDependencies();
   });
 
   $("#setAudioOn").addEventListener("change", () => {

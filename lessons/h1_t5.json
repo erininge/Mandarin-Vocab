@@ -1,0 +1,38 @@
+[
+  {
+    "jp_kana": "jiāo",
+    "jp_kanji": "交",
+    "en": "to hand over; to exchange",
+    "lesson": "Tone Recognition • Lesson 5",
+    "tone_group": "jiao",
+    "default_starred": false,
+    "id": "hsk1_t5_001"
+  },
+  {
+    "jp_kana": "jiáo",
+    "jp_kanji": "嚼",
+    "en": "to chew",
+    "lesson": "Tone Recognition • Lesson 5",
+    "tone_group": "jiao",
+    "default_starred": false,
+    "id": "hsk1_t5_002"
+  },
+  {
+    "jp_kana": "jiǎo",
+    "jp_kanji": "脚",
+    "en": "foot",
+    "lesson": "Tone Recognition • Lesson 5",
+    "tone_group": "jiao",
+    "default_starred": false,
+    "id": "hsk1_t5_003"
+  },
+  {
+    "jp_kana": "jiào",
+    "jp_kanji": "叫",
+    "en": "to be called; to call",
+    "lesson": "Tone Recognition • Lesson 5",
+    "tone_group": "jiao",
+    "default_starred": false,
+    "id": "hsk1_t5_004"
+  }
+]
