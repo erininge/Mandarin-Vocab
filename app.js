@@ -465,13 +465,14 @@ function setVocabRowEditing(row, editing) {
   }
 }
 
-function updateVocabRowDisplay(row, item, displayMode) {
+function updateVocabRowDisplay(row, item) {
   const jpEl = row.querySelector(".jpDisplayText");
+  const pyEl = row.querySelector(".pinyinDisplayText");
   const enEl = row.querySelector(".enDisplayText");
   if (jpEl) {
-    const mode = isHanziOverride(item.id) ? "kanji" : displayMode;
-    jpEl.textContent = jpDisplay(item, mode);
+    jpEl.textContent = item.jp_kanji || item.jp_kana || "";
   }
+  if (pyEl) pyEl.textContent = item.jp_kana || "—";
   if (enEl) enEl.textContent = item.en || "";
 }
 
@@ -600,12 +601,61 @@ async function buildCurrentAudioList({ force = false } = {}) {
 }
 
 async function loadData() {
-  const idx = await fetch("./lessons/index.json").then(r => r.json());
-  LESSONS = idx.lessons || [];
+  const fallbackLessons = [
+    "h1_l1", "h1_l2", "h1_l3", "h1_l4", "h1_l5", "h1_l6", "h1_l7",
+    "h1_l8", "h1_l9", "h1_l10", "h1_l11", "h1_l12", "h1_l13"
+  ].map((code, idx) => ({
+    code,
+    name: `HSK 1 • Lesson ${idx + 1}`,
+    file: `./lessons/${code}.json`
+  }));
+
+  const fetchJsonStrict = async (url) => {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
+    return res.json();
+  };
+
+  const toLessonFileCandidates = (filePath) => {
+    const base = String(filePath || "").trim();
+    if (!base) return [];
+    const normalized = base.replace(/^\.\//, "");
+    const trimmedLessonsPrefix = normalized.replace(/^lessons\//, "");
+    return uniq([
+      `./${normalized}`,
+      normalized,
+      `./lessons/${trimmedLessonsPrefix}`,
+      `lessons/${trimmedLessonsPrefix}`
+    ].filter(Boolean));
+  };
+
+  let idx;
+  try {
+    idx = await fetchJsonStrict("./lessons/index.json");
+  } catch (e) {
+    console.warn("Unable to load lessons/index.json, using bundled fallback list.", e);
+    idx = { lessons: fallbackLessons };
+  }
+
+  LESSONS = Array.isArray(idx?.lessons) && idx.lessons.length ? idx.lessons : fallbackLessons;
   const all = [];
   for (const l of LESSONS) {
-    const arr = await fetch(l.file).then(r => r.json());
+    const candidates = toLessonFileCandidates(l.file);
+    let arr = null;
+    for (const candidate of candidates) {
+      try {
+        arr = await fetchJsonStrict(candidate);
+        if (Array.isArray(arr)) break;
+      } catch (e) {
+        // try next candidate
+      }
+    }
+    if (!Array.isArray(arr)) {
+      console.warn(`Skipping lesson ${l.code}: could not load file.`, l.file);
+      continue;
+    }
     for (const it of arr) all.push(it);
+    if (!l.count || Number.isNaN(Number(l.count))) l.count = arr.length;
   }
   loadVocabEdits();
   all.forEach(applyVocabEditsToItem);
@@ -1073,7 +1123,6 @@ function endQuiz() {
 function buildVocabUI() {
   const starOnly = $("#vStarOnly").checked;
   const lessonFilter = $("#vLessonFilter").value;
-  const display = $("#vDisplay").value;
   const q = ($("#vSearch").value || "").trim();
 
   let rows = ITEMS.slice();
@@ -1111,15 +1160,13 @@ function buildVocabUI() {
     const tr = document.createElement("tr");
     tr.dataset.id = it.id;
     const starOn = isStarred(it.id);
-    const kanjiOn = isHanziOverride(it.id);
-    const rowDisplay = kanjiOn ? "kanji" : display;
     const audioId = audioIdForItem(it);
     tr.innerHTML = `
       <td><button class="starBtn ${starOn ? "on" : ""}" data-id="${it.id}">${starOn ? "⭐" : "☆"}</button></td>
-      <td><button class="kanjiBtn ${kanjiOn ? "on" : ""}" data-id="${it.id}" title="Toggle Hanzi-only for this word">${kanjiOn ? "汉" : "拼"}</button></td>
       <td>
         <div class="vocabView">
-          <div class="jpDisplayText" style="font-weight:800;">${jpDisplay(it, rowDisplay)}</div>
+          <div class="jpDisplayText" style="font-weight:800;">${it.jp_kanji || it.jp_kana || ""}</div>
+          <div class="hint pinyinDisplayText">${it.jp_kana || "—"}</div>
           <div class="hint audioHint">${audioId}</div>
         </div>
         <div class="vocabEdit hidden">
@@ -1178,21 +1225,6 @@ function buildVocabUI() {
     });
   });
 
-  host.querySelectorAll(".kanjiBtn").forEach(b => {
-    b.addEventListener("click", () => {
-      const id = b.getAttribute("data-id");
-      const on = toggleHanziOverride(id);
-      b.textContent = on ? "漢" : "かな";
-      b.classList.toggle("on", on);
-      const cell = b.closest("tr")?.querySelector(".jpDisplayText");
-      if (cell) {
-        const item = ITEMS_BY_ID.get(id);
-        const mode = on ? "kanji" : display;
-        cell.textContent = jpDisplay(item, mode);
-      }
-    });
-  });
-
   host.querySelectorAll(".editBtn").forEach(b => {
     b.addEventListener("click", () => {
       const id = b.getAttribute("data-id");
@@ -1234,7 +1266,7 @@ function buildVocabUI() {
       item.en = next.en;
       VOCAB_EDITS[id] = next;
       saveVocabEdits();
-      updateVocabRowDisplay(row, item, display);
+      updateVocabRowDisplay(row, item);
       setVocabRowEditing(row, false);
       updateCurrentAudioListIfOpen();
       renderStats();
@@ -1392,13 +1424,11 @@ function wireUI() {
   $("#vSearch").addEventListener("input", buildVocabUI);
   $("#vLessonFilter").addEventListener("change", buildVocabUI);
   $("#vStarOnly").addEventListener("change", buildVocabUI);
-  $("#vDisplay").addEventListener("change", buildVocabUI);
   $("#vSort").addEventListener("change", buildVocabUI);
   $("#vReset").addEventListener("click", () => {
     $("#vSearch").value = "";
     $("#vLessonFilter").value = "__all__";
     $("#vStarOnly").checked = false;
-    $("#vDisplay").value = "kana";
     $("#vSort").value = "default";
     buildVocabUI();
   });
