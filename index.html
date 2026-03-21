@@ -151,6 +151,33 @@
           <div class="hint" id="toneHint">Uses your Study lesson selection.</div>
         </div>
       </div>
+
+      <div id="toneGameArea" class="quizStage hidden">
+        <div class="quizPanel">
+          <div class="quizTop">
+            <div class="quizMeta">
+              <div class="quizMetaLine">
+                <div class="quizCourse" id="toneQuizCourse">HSK 1 • Tone Game</div>
+                <div class="quizProgress" id="toneQuizProgress">—</div>
+              </div>
+              <div class="hint" id="toneQuizSub">—</div>
+            </div>
+            <div class="quizActions">
+              <button class="btn subtle" id="btnReplayTone" title="Replay tone audio">🔊</button>
+              <button class="btn subtle" id="btnToggleStarTone" title="Star">☆</button>
+              <button class="btn subtle danger" id="btnEndTone">Quit</button>
+            </div>
+          </div>
+
+          <div id="tonePrompt" class="prompt">🎧 Tone listening: which word did you hear?</div>
+          <div id="toneAnswerMC" class="answers"></div>
+          <div id="toneFeedback" class="feedback hidden"></div>
+
+          <div class="row gap quizFooter">
+            <button class="btn subtle" id="btnNextTone" disabled>Next</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="view-vocab" class="view hidden">

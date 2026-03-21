@@ -985,6 +985,16 @@ let QUIZ = {
   correctCount: 0
 };
 
+let TONE_GAME = {
+  active: false,
+  pool: [],
+  questions: [],
+  idx: 0,
+  current: null,
+  awaitingNext: false,
+  correctCount: 0
+};
+
 function resetQuizUI() {
   $("#quizArea").classList.add("hidden");
   $("#studySetup").classList.remove("hidden");
@@ -996,6 +1006,27 @@ function resetQuizUI() {
   $("#quizCourse").textContent = "HSK 1 • —";
   $("#quizProgress").textContent = "—";
   $("#btnNext").disabled = true;
+}
+
+function resetToneGameUI() {
+  $("#toneGameArea")?.classList.add("hidden");
+  $("#toneSetup")?.classList.remove("hidden");
+  const feedback = $("#toneFeedback");
+  if (feedback) {
+    feedback.classList.add("hidden");
+    feedback.classList.remove("good", "bad");
+    feedback.textContent = "";
+  }
+  const prompt = $("#tonePrompt");
+  if (prompt) prompt.textContent = "🎧 Tone listening: which word did you hear?";
+  const sub = $("#toneQuizSub");
+  if (sub) sub.textContent = "—";
+  const progress = $("#toneQuizProgress");
+  if (progress) progress.textContent = "—";
+  const next = $("#btnNextTone");
+  if (next) next.disabled = true;
+  const answers = $("#toneAnswerMC");
+  if (answers) answers.innerHTML = "";
 }
 
 function setQuizVisibility(active) {
@@ -1047,15 +1078,125 @@ function startToneQuiz() {
     toast("Turn on Audio in Settings to play Tone Game.");
     return;
   }
+  const pool0 = currentPool();
+  let pool = pool0;
   const useAuto = $("#toneAuto")?.checked ?? true;
-  const qCount = Number($("#toneCount")?.value || 20);
+  const countValue = Number($("#toneCount")?.value || 20);
   const starredOnly = $("#toneStarredOnly")?.checked ?? false;
-  startQuiz(starredOnly, {
-    qmode: "tonelisten",
-    atype: "mc",
-    useAuto,
-    qCount
+  if (starredOnly) pool = pool.filter((it) => isStarred(it.id));
+  if (pool.length === 0) {
+    toast("No items in your selected set.");
+    return;
+  }
+  const qCount = useAuto ? pool.length : Math.max(1, Math.min(500, countValue));
+  const maxCount = Math.min(qCount, pool.length);
+  if (qCount > pool.length) {
+    toast(`Only ${pool.length} items available — tone game set to ${pool.length}.`);
+  }
+
+  TONE_GAME = {
+    active: true,
+    pool,
+    questions: shuffle(pool).slice(0, maxCount),
+    idx: 0,
+    current: null,
+    awaitingNext: false,
+    correctCount: 0
+  };
+
+  $("#toneSetup")?.classList.add("hidden");
+  $("#toneGameArea")?.classList.remove("hidden");
+  showView("tone");
+  nextToneQuestion();
+}
+
+function lockToneChoices(correct, picked) {
+  const buttons = $$("#toneAnswerMC .choice");
+  buttons.forEach((b) => {
+    b.disabled = true;
+    const value = b.dataset.value || b.textContent;
+    if (value === correct) b.classList.add("correct");
+    if (value === picked && picked !== correct) b.classList.add("wrong");
   });
+}
+
+function showToneFeedback(ok, detail) {
+  const fb = $("#toneFeedback");
+  if (!fb) return;
+  fb.classList.remove("hidden");
+  fb.classList.toggle("good", ok);
+  fb.classList.toggle("bad", !ok);
+  fb.textContent = detail;
+}
+
+function renderToneChoices(item) {
+  const host = $("#toneAnswerMC");
+  if (!host) return;
+  const q = { item, qmode: "tonelisten" };
+  const { correct, options } = buildMCOptions(q, TONE_GAME.pool, "both");
+  host.innerHTML = "";
+  options.forEach((opt, i) => {
+    const b = document.createElement("button");
+    b.className = "choice";
+    b.dataset.index = String(i);
+    b.dataset.value = opt;
+    const index = document.createElement("span");
+    index.className = "choiceIndex";
+    index.textContent = String(i + 1);
+    const label = document.createElement("span");
+    label.className = "choiceText";
+    label.textContent = opt;
+    b.append(index, label);
+    b.addEventListener("click", () => submitToneChoice(opt, correct));
+    host.appendChild(b);
+  });
+}
+
+function submitToneChoice(picked, correct) {
+  if (!TONE_GAME.active || TONE_GAME.awaitingNext) return;
+  const item = TONE_GAME.current;
+  if (!item) return;
+  const ok = picked === correct;
+  TONE_GAME.awaitingNext = true;
+  $("#btnNextTone").disabled = false;
+  lockToneChoices(correct, picked);
+  recordAttempt(item.id, ok);
+  if (ok) TONE_GAME.correctCount += 1;
+  showToneFeedback(ok, ok ? "✅ Correct" : `❌ Incorrect • Correct: ${correct}`);
+}
+
+function nextToneQuestion() {
+  if (!TONE_GAME.active) return;
+  TONE_GAME.awaitingNext = false;
+  const feedback = $("#toneFeedback");
+  if (feedback) {
+    feedback.classList.add("hidden");
+    feedback.textContent = "";
+  }
+  $("#btnNextTone").disabled = true;
+
+  if (TONE_GAME.idx >= TONE_GAME.questions.length) {
+    endToneGame();
+    return;
+  }
+
+  const item = TONE_GAME.questions[TONE_GAME.idx];
+  TONE_GAME.current = item;
+  $("#toneQuizProgress").textContent = `Question ${TONE_GAME.idx + 1}/${TONE_GAME.questions.length}`;
+  $("#toneQuizSub").textContent = `Correct: ${TONE_GAME.correctCount} • Pool: ${TONE_GAME.pool.length}`;
+  $("#toneQuizCourse").textContent = `HSK 1 • ${item.lesson}`;
+  $("#btnToggleStarTone").textContent = isStarred(item.id) ? "⭐" : "☆";
+  renderToneChoices(item);
+  playItemAudio(item);
+}
+
+function endToneGame() {
+  const total = TONE_GAME.questions.length;
+  const correct = TONE_GAME.correctCount;
+  TONE_GAME.active = false;
+  toast(`Tone game finished: ${correct}/${total}`);
+  renderStats();
+  resetToneGameUI();
 }
 
 function setStarButton(item) {
@@ -1444,6 +1585,25 @@ function wireUI() {
   $("#btnStart").addEventListener("click", () => startQuiz(false));
   $("#btnPracticeStarred").addEventListener("click", () => startQuiz(true));
   $("#btnStartTone")?.addEventListener("click", startToneQuiz);
+  $("#btnReplayTone")?.addEventListener("click", () => {
+    if (!TONE_GAME.current) return;
+    playItemAudio(TONE_GAME.current);
+  });
+  $("#btnToggleStarTone")?.addEventListener("click", () => {
+    if (!TONE_GAME.current) return;
+    const on = toggleStar(TONE_GAME.current.id);
+    $("#btnToggleStarTone").textContent = on ? "⭐" : "☆";
+  });
+  $("#btnNextTone")?.addEventListener("click", () => {
+    if (!TONE_GAME.active) return;
+    if (!TONE_GAME.awaitingNext) {
+      toast("Pick an answer first.");
+      return;
+    }
+    TONE_GAME.idx += 1;
+    nextToneQuestion();
+  });
+  $("#btnEndTone")?.addEventListener("click", endToneGame);
 
   $("#btnReplay").addEventListener("click", () => {
     if (!QUIZ.current) return;
@@ -1599,8 +1759,14 @@ function wireUI() {
     updateQuestionCountUI();
     updateCurrentAudioListIfOpen();
     if (QUIZ.current) setStarButton(QUIZ.current.item);
+    if (TONE_GAME.current) {
+      $("#btnToggleStarTone").textContent = isStarred(TONE_GAME.current.id) ? "⭐" : "☆";
+    }
     if (QUIZ.active && QUIZ.starFiltered) {
       endQuiz();
+    }
+    if (TONE_GAME.active && $("#toneStarredOnly")?.checked) {
+      endToneGame();
     }
     toast("Stars reset.");
   });
@@ -1617,30 +1783,47 @@ function wireUI() {
     const key = e.key;
     const isTypingMode = QUIZ.active && !$("#answerType").classList.contains("hidden");
     const isMCMode = QUIZ.active && !$("#answerMC").classList.contains("hidden");
+    const isToneMCMode = TONE_GAME.active && !$("#toneGameArea")?.classList.contains("hidden");
 
     if (key === "=") {
-      if (QUIZ.active) {
+      if (QUIZ.active || TONE_GAME.active) {
         e.preventDefault();
         if (QUIZ.current) playItemAudio(QUIZ.current.item);
+        if (TONE_GAME.current) playItemAudio(TONE_GAME.current);
       }
       return;
     }
     if (key === "`") {
-      if (QUIZ.active) {
+      if (QUIZ.active || TONE_GAME.active) {
         e.preventDefault();
         if (QUIZ.current) {
           const on = toggleStar(QUIZ.current.item.id);
           $("#btnToggleStar").textContent = on ? "⭐" : "☆";
         }
+        if (TONE_GAME.current) {
+          const on = toggleStar(TONE_GAME.current.id);
+          $("#btnToggleStarTone").textContent = on ? "⭐" : "☆";
+        }
       }
       return;
     }
 
-    if (isMCMode && ["1","2","3","4"].includes(key)) {
+    if ((isMCMode || isToneMCMode) && ["1","2","3","4"].includes(key)) {
       e.preventDefault();
       const idx = Number(key) - 1;
-      const btn = $$("#answerMC .choice")[idx];
+      const btn = isToneMCMode ? $$("#toneAnswerMC .choice")[idx] : $$("#answerMC .choice")[idx];
       if (btn) btn.click();
+      return;
+    }
+
+    if (key === "Enter" && TONE_GAME.active && !inInput) {
+      e.preventDefault();
+      if (!TONE_GAME.awaitingNext) {
+        toast("Pick an answer first.");
+        return;
+      }
+      TONE_GAME.idx += 1;
+      nextToneQuestion();
       return;
     }
 
@@ -1687,6 +1870,7 @@ function wireUI() {
   });
 
   showView("study");
+  resetToneGameUI();
   applySettingsToUI(SETTINGS);
 }
 
