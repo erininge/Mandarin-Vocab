@@ -601,12 +601,61 @@ async function buildCurrentAudioList({ force = false } = {}) {
 }
 
 async function loadData() {
-  const idx = await fetch("./lessons/index.json").then(r => r.json());
-  LESSONS = idx.lessons || [];
+  const fallbackLessons = [
+    "h1_l1", "h1_l2", "h1_l3", "h1_l4", "h1_l5", "h1_l6", "h1_l7",
+    "h1_l8", "h1_l9", "h1_l10", "h1_l11", "h1_l12", "h1_l13"
+  ].map((code, idx) => ({
+    code,
+    name: `HSK 1 • Lesson ${idx + 1}`,
+    file: `./lessons/${code}.json`
+  }));
+
+  const fetchJsonStrict = async (url) => {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
+    return res.json();
+  };
+
+  const toLessonFileCandidates = (filePath) => {
+    const base = String(filePath || "").trim();
+    if (!base) return [];
+    const normalized = base.replace(/^\.\//, "");
+    const trimmedLessonsPrefix = normalized.replace(/^lessons\//, "");
+    return uniq([
+      `./${normalized}`,
+      normalized,
+      `./lessons/${trimmedLessonsPrefix}`,
+      `lessons/${trimmedLessonsPrefix}`
+    ].filter(Boolean));
+  };
+
+  let idx;
+  try {
+    idx = await fetchJsonStrict("./lessons/index.json");
+  } catch (e) {
+    console.warn("Unable to load lessons/index.json, using bundled fallback list.", e);
+    idx = { lessons: fallbackLessons };
+  }
+
+  LESSONS = Array.isArray(idx?.lessons) && idx.lessons.length ? idx.lessons : fallbackLessons;
   const all = [];
   for (const l of LESSONS) {
-    const arr = await fetch(l.file).then(r => r.json());
+    const candidates = toLessonFileCandidates(l.file);
+    let arr = null;
+    for (const candidate of candidates) {
+      try {
+        arr = await fetchJsonStrict(candidate);
+        if (Array.isArray(arr)) break;
+      } catch (e) {
+        // try next candidate
+      }
+    }
+    if (!Array.isArray(arr)) {
+      console.warn(`Skipping lesson ${l.code}: could not load file.`, l.file);
+      continue;
+    }
     for (const it of arr) all.push(it);
+    if (!l.count || Number.isNaN(Number(l.count))) l.count = arr.length;
   }
   loadVocabEdits();
   all.forEach(applyVocabEditsToItem);
