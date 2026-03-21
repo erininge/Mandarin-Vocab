@@ -1,6 +1,6 @@
 {
   "course": "HSK1",
-  "version": "1.0",
+  "version": "1.1",
   "lessons": [
     {
       "code": "h1_l1",
@@ -79,6 +79,36 @@
       "name": "HSK 1 • Lesson 13",
       "file": "lessons/h1_l13.json",
       "count": 6
+    },
+    {
+      "code": "h1_t1",
+      "name": "Tone Recognition • Lesson 1",
+      "file": "lessons/h1_t1.json",
+      "count": 4
+    },
+    {
+      "code": "h1_t2",
+      "name": "Tone Recognition • Lesson 2",
+      "file": "lessons/h1_t2.json",
+      "count": 4
+    },
+    {
+      "code": "h1_t3",
+      "name": "Tone Recognition • Lesson 3",
+      "file": "lessons/h1_t3.json",
+      "count": 4
+    },
+    {
+      "code": "h1_t4",
+      "name": "Tone Recognition • Lesson 4",
+      "file": "lessons/h1_t4.json",
+      "count": 4
+    },
+    {
+      "code": "h1_t5",
+      "name": "Tone Recognition • Lesson 5",
+      "file": "lessons/h1_t5.json",
+      "count": 4
     }
   ]
 }

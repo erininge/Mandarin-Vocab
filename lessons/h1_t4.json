@@ -1,0 +1,38 @@
+[
+  {
+    "jp_kana": "fēn",
+    "jp_kanji": "分",
+    "en": "to divide; part",
+    "lesson": "Tone Recognition • Lesson 4",
+    "tone_group": "fen",
+    "default_starred": false,
+    "id": "hsk1_t4_001"
+  },
+  {
+    "jp_kana": "fén",
+    "jp_kanji": "坟",
+    "en": "grave",
+    "lesson": "Tone Recognition • Lesson 4",
+    "tone_group": "fen",
+    "default_starred": false,
+    "id": "hsk1_t4_002"
+  },
+  {
+    "jp_kana": "fěn",
+    "jp_kanji": "粉",
+    "en": "powder",
+    "lesson": "Tone Recognition • Lesson 4",
+    "tone_group": "fen",
+    "default_starred": false,
+    "id": "hsk1_t4_003"
+  },
+  {
+    "jp_kana": "fèn",
+    "jp_kanji": "份",
+    "en": "portion; share",
+    "lesson": "Tone Recognition • Lesson 4",
+    "tone_group": "fen",
+    "default_starred": false,
+    "id": "hsk1_t4_004"
+  }
+]
