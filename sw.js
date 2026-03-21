@@ -1,6 +1,7 @@
 /*
   Kat’s Mandarin Garden 🌸 — HSK 1
   Changelog:
+  - V7.0: select tone lessons in Tone tab + cache refresh
   - V6.9: move tone recognition to dedicated Tone Game tab + cache refresh
   - V6.8: add tone recognition lessons + listening mode + cache refresh
   - V6.7: add app refresh/update control + force cache refresh flow
@@ -8,12 +9,12 @@
   - V6.4: add Adjectives lesson + cache update
   - V6.3: add Lesson 9 vocab + cache update
 */
-const CACHE_NAME = "hsk1-mandarin-garden-cache-v1.2";
+const CACHE_NAME = "hsk1-mandarin-garden-cache-v1.3";
 const CORE_ASSETS = [
   "./",
-  "./index.html?f=v1.2",
-  "./styles.css?f=v1.2",
-  "./app.js?f=v1.2",
+  "./index.html?f=v1.3",
+  "./styles.css?f=v1.3",
+  "./app.js?f=v1.3",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
