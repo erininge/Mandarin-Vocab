@@ -1,0 +1,38 @@
+[
+  {
+    "jp_kana": "shī",
+    "jp_kanji": "诗",
+    "en": "poem",
+    "lesson": "Tone Recognition • Lesson 2",
+    "tone_group": "shi",
+    "default_starred": false,
+    "id": "hsk1_t2_001"
+  },
+  {
+    "jp_kana": "shí",
+    "jp_kanji": "十",
+    "en": "ten",
+    "lesson": "Tone Recognition • Lesson 2",
+    "tone_group": "shi",
+    "default_starred": false,
+    "id": "hsk1_t2_002"
+  },
+  {
+    "jp_kana": "shǐ",
+    "jp_kanji": "史",
+    "en": "history",
+    "lesson": "Tone Recognition • Lesson 2",
+    "tone_group": "shi",
+    "default_starred": false,
+    "id": "hsk1_t2_003"
+  },
+  {
+    "jp_kana": "shì",
+    "jp_kanji": "是",
+    "en": "to be; is",
+    "lesson": "Tone Recognition • Lesson 2",
+    "tone_group": "shi",
+    "default_starred": false,
+    "id": "hsk1_t2_004"
+  }
+]

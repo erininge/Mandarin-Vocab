@@ -550,6 +550,10 @@ kbd {
 .choiceText {
   flex: 1 1 auto;
 }
+.answers.hanziChoices .choiceText {
+  font-size: 1.45rem;
+  line-height: 1.35;
+}
 @media (pointer: fine) and (min-width: 561px) {
   .choiceIndex { display: inline-flex; }
 }

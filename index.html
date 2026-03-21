@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f1116" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
-  <link rel="stylesheet" href="styles.css?f=v1.0" />
+  <link rel="stylesheet" href="styles.css?f=v1.3" />
   <title>Kat’s Mandarin Garden 🌸 — HSK 1</title>
 </head>
 <body>
@@ -16,7 +16,7 @@
       <div class="logo">🌸</div>
       <div class="brandText">
         <div class="title">Kat’s Vocab Garden 🌸</div>
-        <div class="sub">HSK 1 • <span id="versionLabel">V1.0</span></div>
+        <div class="sub">HSK 1 • <span id="versionLabel">V1.3</span></div>
       </div>
     </div>
 
@@ -32,6 +32,7 @@
 
     <nav class="nav">
       <button class="navBtn" data-view="study">Study</button>
+      <button class="navBtn" data-view="tone">Tone Game</button>
       <button class="navBtn" data-view="vocab">View Vocab</button>
       <button class="navBtn" data-view="stats">Stats</button>
       <button class="navBtn" data-view="settings">Settings</button>
@@ -128,6 +129,61 @@
 
           <div class="row gap quizFooter">
             <button class="btn subtle" id="btnNext" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="view-tone" class="view hidden">
+      <div class="card" id="toneSetup">
+        <div class="cardTitle">Tone recognition game</div>
+        <div class="hint">Listen carefully and pick the matching word. This mode is multiple-choice only.</div>
+
+        <div style="margin-top:12px;">
+          <label class="label">Tone lessons</label>
+          <div id="toneLessonList" class="lessonList"></div>
+          <div class="row gap">
+            <button class="btn subtle" id="btnSelectAllTone">Select all</button>
+            <button class="btn subtle" id="btnClearAllTone">Clear</button>
+          </div>
+        </div>
+
+        <div class="row gap" style="margin-top: 12px;">
+          <label class="chip"><input type="checkbox" id="toneStarredOnly"> Starred only</label>
+          <label class="chip"><input type="checkbox" id="toneAuto" checked> AUTO</label>
+          <label class="chip">Questions: <input id="toneCount" class="num" type="number" min="5" max="200" value="20"></label>
+        </div>
+
+        <div class="row gap" style="margin-top: 12px;">
+          <button class="btn primary" id="btnStartTone">Start Tone Game</button>
+          <div class="hint" id="toneHint">Select tone lessons to play.</div>
+        </div>
+      </div>
+
+      <div id="toneGameArea" class="quizStage hidden">
+        <div class="quizPanel">
+          <div class="quizTop">
+            <div class="quizMeta">
+              <div class="quizMetaLine">
+                <div class="quizCourse" id="toneQuizCourse">HSK 1 • Tone Game</div>
+                <div class="quizProgress" id="toneQuizProgress">—</div>
+              </div>
+              <div class="hint" id="toneQuizSub">—</div>
+            </div>
+            <div class="quizActions">
+              <button class="btn subtle" id="btnReplayTone" title="Replay tone audio">🔊</button>
+              <button class="btn subtle" id="btnToggleStarTone" title="Star">☆</button>
+              <button class="btn subtle danger" id="btnEndTone">Quit</button>
+            </div>
+          </div>
+
+          <div id="tonePrompt" class="prompt">🎧 Tone listening: which word did you hear?</div>
+          <div id="toneAnswerMC" class="answers"></div>
+          <div id="toneFeedback" class="feedback hidden"></div>
+
+          <div class="row gap quizFooter">
+            <button class="btn subtle" id="btnNextTone" disabled>Next</button>
           </div>
         </div>
       </div>
@@ -247,6 +303,6 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="app.js?f=v1.0"></script>
+  <script src="app.js?f=v1.3"></script>
 </body>
 </html>

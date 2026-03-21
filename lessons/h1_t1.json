@@ -1,0 +1,38 @@
+[
+  {
+    "jp_kana": "mā",
+    "jp_kanji": "妈",
+    "en": "mother",
+    "lesson": "Tone Recognition • Lesson 1",
+    "tone_group": "ma",
+    "default_starred": false,
+    "id": "hsk1_t1_001"
+  },
+  {
+    "jp_kana": "má",
+    "jp_kanji": "麻",
+    "en": "hemp; numb",
+    "lesson": "Tone Recognition • Lesson 1",
+    "tone_group": "ma",
+    "default_starred": false,
+    "id": "hsk1_t1_002"
+  },
+  {
+    "jp_kana": "mǎ",
+    "jp_kanji": "马",
+    "en": "horse",
+    "lesson": "Tone Recognition • Lesson 1",
+    "tone_group": "ma",
+    "default_starred": false,
+    "id": "hsk1_t1_003"
+  },
+  {
+    "jp_kana": "mà",
+    "jp_kanji": "骂",
+    "en": "to scold",
+    "lesson": "Tone Recognition • Lesson 1",
+    "tone_group": "ma",
+    "default_starred": false,
+    "id": "hsk1_t1_004"
+  }
+]

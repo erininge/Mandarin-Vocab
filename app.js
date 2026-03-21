@@ -1,13 +1,13 @@
-/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.0) */
+/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.3) */
 
-const APP_VERSION = "V1.0";
+const APP_VERSION = "V1.3";
 const STORAGE = {
-  stars: "hsk1_stars_v1",
-  settings: "hsk1_settings_v1",
-  stats: "hsk1_stats_v1",
-  kanjiOverrides: "hsk1_hanzi_overrides_v1",
-  vocabEdits: "hsk1_vocab_edits_v1",
-  seeded: "hsk1_seeded_v1"
+  stars: "hsk1_stars_v1_1",
+  settings: "hsk1_settings_v1_1",
+  stats: "hsk1_stats_v1_1",
+  kanjiOverrides: "hsk1_hanzi_overrides_v1_1",
+  vocabEdits: "hsk1_vocab_edits_v1_1",
+  seeded: "hsk1_seeded_v1_1"
 };
 
 const DEFAULT_SETTINGS = {
@@ -350,6 +350,7 @@ function applyBackgroundVideo(state) {
 }
 
 let LESSONS = [];
+let LESSON_NAME_TO_CODE = new Map();
 let ITEMS = [];
 let ITEMS_BY_ID = new Map();
 let VOCAB_EDITS = {};
@@ -477,6 +478,8 @@ function updateVocabRowDisplay(row, item) {
 }
 
 function lesson_code(lessonName) {
+  const normalized = (lessonName || "").toLowerCase().trim();
+  if (LESSON_NAME_TO_CODE.has(normalized)) return LESSON_NAME_TO_CODE.get(normalized);
   const lower = (lessonName || "").toLowerCase();
   const m = lower.match(/lesson\s*([0-9]+)/);
   if (m) return "h1_l" + m[1];
@@ -487,6 +490,14 @@ function selectedLessonCodes() {
   return $$("#lessonList input[type=checkbox]:checked").map(x => x.value);
 }
 
+function selectedToneLessonCodes() {
+  return $$("#toneLessonList input[type=checkbox]:checked").map(x => x.value);
+}
+
+function isToneLessonCode(code) {
+  return /^h1_t/i.test(String(code || ""));
+}
+
 function currentPool() {
   const codes = selectedLessonCodes();
   let pool = ITEMS.filter(it => codes.includes(lesson_code(it.lesson)));
@@ -494,6 +505,11 @@ function currentPool() {
     pool = pool.filter(it => isStarred(it.id));
   }
   return pool;
+}
+
+function currentTonePool() {
+  const codes = selectedToneLessonCodes();
+  return ITEMS.filter((it) => codes.includes(lesson_code(it.lesson)));
 }
 
 function currentPoolSignature(pool) {
@@ -603,10 +619,11 @@ async function buildCurrentAudioList({ force = false } = {}) {
 async function loadData() {
   const fallbackLessons = [
     "h1_l1", "h1_l2", "h1_l3", "h1_l4", "h1_l5", "h1_l6", "h1_l7",
-    "h1_l8", "h1_l9", "h1_l10", "h1_l11", "h1_l12", "h1_l13"
+    "h1_l8", "h1_l9", "h1_l10", "h1_l11", "h1_l12", "h1_l13",
+    "h1_t1", "h1_t2", "h1_t3", "h1_t4", "h1_t5"
   ].map((code, idx) => ({
     code,
-    name: `HSK 1 • Lesson ${idx + 1}`,
+    name: idx < 13 ? `HSK 1 • Lesson ${idx + 1}` : `Tone Recognition • Lesson ${idx - 12}`,
     file: `./lessons/${code}.json`
   }));
 
@@ -638,6 +655,7 @@ async function loadData() {
   }
 
   LESSONS = Array.isArray(idx?.lessons) && idx.lessons.length ? idx.lessons : fallbackLessons;
+  LESSON_NAME_TO_CODE = new Map(LESSONS.map((l) => [String(l.name || "").toLowerCase().trim(), l.code]));
   const all = [];
   for (const l of LESSONS) {
     const candidates = toLessonFileCandidates(l.file);
@@ -677,8 +695,10 @@ async function loadData() {
 
 function buildLessonUI() {
   const host = $("#lessonList");
+  const toneHost = $("#toneLessonList");
   host.innerHTML = "";
-  for (const l of LESSONS) {
+  if (toneHost) toneHost.innerHTML = "";
+  for (const l of LESSONS.filter((lesson) => !isToneLessonCode(lesson.code))) {
     const row = document.createElement("label");
     row.className = "lessonRow";
     row.innerHTML = `
@@ -690,6 +710,20 @@ function buildLessonUI() {
     `;
     host.appendChild(row);
   }
+  if (toneHost) {
+    for (const l of LESSONS.filter((lesson) => isToneLessonCode(lesson.code))) {
+      const row = document.createElement("label");
+      row.className = "lessonRow";
+      row.innerHTML = `
+        <span>
+          <input type="checkbox" value="${l.code}" checked />
+          <strong style="margin-left:6px;">${l.name}</strong>
+        </span>
+        <span class="meta">${l.count} items</span>
+      `;
+      toneHost.appendChild(row);
+    }
+  }
   host.addEventListener("change", () => {
     refreshHeaderCounts();
     updateLessonHint();
@@ -697,11 +731,25 @@ function buildLessonUI() {
     updateQuestionCountUI();
     updateCurrentAudioListIfOpen();
   });
+  toneHost?.addEventListener("change", () => {
+    updateToneHint();
+  });
   updateLessonHint();
   updateQuestionCountUI();
+  updateToneHint();
 
   const sel = $("#vLessonFilter");
   sel.innerHTML = `<option value="__all__">All lessons</option>` + LESSONS.map(l => `<option value="${l.code}">${l.name}</option>`).join("");
+}
+
+
+function updateToneHint() {
+  const pool = currentTonePool();
+  const starOnly = $("#toneStarredOnly")?.checked;
+  const playable = starOnly ? pool.filter((it) => isStarred(it.id)).length : pool.length;
+  const audioState = SETTINGS.audioOn ? "Audio on" : "Audio off";
+  const hint = $("#toneHint");
+  if (hint) hint.textContent = `${playable} playable item(s) • Tone lessons selected • ${audioState}`;
 }
 
 function updateLessonHint() {
@@ -730,7 +778,22 @@ function updateListeningAvailability() {
       select.value = "mixed";
     }
   }
+  updateQModeDependencies();
   updateAudioUI();
+  updateToneHint();
+}
+
+function isToneListenMode(mode) {
+  return mode === "tonelisten";
+}
+
+function updateQModeDependencies() {
+  const qmode = getQMode();
+  const atype = $("#aTypeSelect");
+  if (!atype) return;
+  const toneMode = isToneListenMode(qmode);
+  if (toneMode) atype.value = "mc";
+  atype.disabled = toneMode;
 }
 
 function getQMode() {
@@ -835,7 +898,7 @@ async function playItemAudio(item) {
 }
 
 function showView(view) {
-  for (const v of ["study","vocab","stats","settings"]) {
+  for (const v of ["study","tone","vocab","stats","settings"]) {
     const sec = document.getElementById(`view-${v}`);
     sec.classList.toggle("hidden", v !== view);
     document.querySelector(`.navBtn[data-view='${v}']`).classList.toggle("active", v === view);
@@ -865,6 +928,7 @@ function makeQuestion(item, qmode, atype) {
     qm = allowed[Math.floor(Math.random()*allowed.length)];
   }
   let am = atype;
+  if (isToneListenMode(qm)) am = "mc";
   if (am === "mixed") am = Math.random() < 0.5 ? "mc" : "type";
   return { item, qmode: qm, atype: am };
 }
@@ -873,12 +937,16 @@ function promptTextForQuestion(q, dmode) {
   const it = q.item;
   if (q.qmode === "en2jp") return it.en;
   if (q.qmode === "jp2en") return jpDisplay(it, displayModeForItem(it, dmode));
+  if (isToneListenMode(q.qmode)) return "🎧 Tone listening: which word did you hear?";
   if (q.qmode.startsWith("listen")) return "🎧 Listening… (press =)";
   return it.en;
 }
 
 function correctAnswerText(q, dmode) {
   const it = q.item;
+  if (isToneListenMode(q.qmode)) {
+    return `${it.jp_kana} • ${it.jp_kanji} — ${it.en}`;
+  }
   if (q.qmode === "en2jp" || q.qmode === "listen2jp") {
     return jpDisplay(it, displayModeForItem(it, dmode));
   }
@@ -887,6 +955,19 @@ function correctAnswerText(q, dmode) {
 
 function buildMCOptions(q, pool, dmode) {
   const it = q.item;
+  if (isToneListenMode(q.qmode)) {
+    const toneGroup = String(it.tone_group || "").trim();
+    const groupPool = toneGroup
+      ? pool.filter((x) => String(x.tone_group || "").trim() === toneGroup)
+      : [];
+    const candidates = groupPool.length >= 2 ? groupPool : pool;
+    const correct = `${it.jp_kana} • ${it.jp_kanji} — ${it.en}`;
+    const mapped = candidates
+      .filter((x) => x.id !== it.id)
+      .map((x) => `${x.jp_kana} • ${x.jp_kanji} — ${x.en}`);
+    const distractors = sample(uniq(mapped.filter(Boolean)), 3);
+    return { correct, options: shuffle([correct, ...distractors]) };
+  }
   const isJPAnswer = (q.qmode === "en2jp" || q.qmode === "listen2jp");
   const correct = isJPAnswer ? jpDisplay(it, displayModeForItem(it, dmode)) : it.en;
 
@@ -935,6 +1016,16 @@ let QUIZ = {
   correctCount: 0
 };
 
+let TONE_GAME = {
+  active: false,
+  pool: [],
+  questions: [],
+  idx: 0,
+  current: null,
+  awaitingNext: false,
+  correctCount: 0
+};
+
 function resetQuizUI() {
   $("#quizArea").classList.add("hidden");
   $("#studySetup").classList.remove("hidden");
@@ -948,12 +1039,33 @@ function resetQuizUI() {
   $("#btnNext").disabled = true;
 }
 
+function resetToneGameUI() {
+  $("#toneGameArea")?.classList.add("hidden");
+  $("#toneSetup")?.classList.remove("hidden");
+  const feedback = $("#toneFeedback");
+  if (feedback) {
+    feedback.classList.add("hidden");
+    feedback.classList.remove("good", "bad");
+    feedback.textContent = "";
+  }
+  const prompt = $("#tonePrompt");
+  if (prompt) prompt.textContent = "🎧 Tone listening: which word did you hear?";
+  const sub = $("#toneQuizSub");
+  if (sub) sub.textContent = "—";
+  const progress = $("#toneQuizProgress");
+  if (progress) progress.textContent = "—";
+  const next = $("#btnNextTone");
+  if (next) next.disabled = true;
+  const answers = $("#toneAnswerMC");
+  if (answers) answers.innerHTML = "";
+}
+
 function setQuizVisibility(active) {
   $("#quizArea").classList.toggle("hidden", !active);
   $("#studySetup").classList.toggle("hidden", active);
 }
 
-function startQuiz(forceStarredOnly=false) {
+function startQuiz(forceStarredOnly=false, overrides={}) {
   const pool0 = currentPool();
   let pool = pool0;
 
@@ -962,16 +1074,17 @@ function startQuiz(forceStarredOnly=false) {
     toast("No items in your selected set.");
     return;
   }
-  const useAuto = $("#qAuto").checked;
+  const useAuto = overrides.useAuto ?? $("#qAuto").checked;
+  const countValue = overrides.qCount ?? Number($("#qCount")?.value || 20);
   const qCount = useAuto
     ? pool.length
-    : Math.max(1, Math.min(500, Number($("#qCount").value || 20)));
+    : Math.max(1, Math.min(500, countValue));
   const maxCount = Math.min(qCount, pool.length);
   if (qCount > pool.length) {
     toast(`Only ${pool.length} items available — quiz set to ${pool.length}.`);
   }
-  const qmode = getQMode();
-  const atype = getAType();
+  const qmode = overrides.qmode || getQMode();
+  const atype = overrides.atype || getAType();
 
   const questions = shuffle(pool).slice(0, maxCount).map(it => makeQuestion(it, qmode, atype));
 
@@ -990,6 +1103,133 @@ function startQuiz(forceStarredOnly=false) {
   nextQuestion();
 }
 
+
+function startToneQuiz() {
+  if (!SETTINGS.audioOn) {
+    toast("Turn on Audio in Settings to play Tone Game.");
+    return;
+  }
+  const pool0 = currentTonePool();
+  let pool = pool0;
+  const useAuto = $("#toneAuto")?.checked ?? true;
+  const countValue = Number($("#toneCount")?.value || 20);
+  const starredOnly = $("#toneStarredOnly")?.checked ?? false;
+  if (starredOnly) pool = pool.filter((it) => isStarred(it.id));
+  if (pool.length === 0) {
+    toast("No items in your selected tone lessons.");
+    return;
+  }
+  const qCount = useAuto ? pool.length : Math.max(1, Math.min(500, countValue));
+  const maxCount = Math.min(qCount, pool.length);
+  if (qCount > pool.length) {
+    toast(`Only ${pool.length} items available — tone game set to ${pool.length}.`);
+  }
+
+  TONE_GAME = {
+    active: true,
+    pool,
+    questions: shuffle(pool).slice(0, maxCount),
+    idx: 0,
+    current: null,
+    awaitingNext: false,
+    correctCount: 0
+  };
+
+  $("#toneSetup")?.classList.add("hidden");
+  $("#toneGameArea")?.classList.remove("hidden");
+  showView("tone");
+  nextToneQuestion();
+}
+
+function lockToneChoices(correct, picked) {
+  const buttons = $$("#toneAnswerMC .choice");
+  buttons.forEach((b) => {
+    b.disabled = true;
+    const value = b.dataset.value || b.textContent;
+    if (value === correct) b.classList.add("correct");
+    if (value === picked && picked !== correct) b.classList.add("wrong");
+  });
+}
+
+function showToneFeedback(ok, detail) {
+  const fb = $("#toneFeedback");
+  if (!fb) return;
+  fb.classList.remove("hidden");
+  fb.classList.toggle("good", ok);
+  fb.classList.toggle("bad", !ok);
+  fb.textContent = detail;
+}
+
+function renderToneChoices(item) {
+  const host = $("#toneAnswerMC");
+  if (!host) return;
+  const q = { item, qmode: "tonelisten" };
+  const { correct, options } = buildMCOptions(q, TONE_GAME.pool, "both");
+  host.innerHTML = "";
+  options.forEach((opt, i) => {
+    const b = document.createElement("button");
+    b.className = "choice";
+    b.dataset.index = String(i);
+    b.dataset.value = opt;
+    const index = document.createElement("span");
+    index.className = "choiceIndex";
+    index.textContent = String(i + 1);
+    const label = document.createElement("span");
+    label.className = "choiceText";
+    label.textContent = opt;
+    b.append(index, label);
+    b.addEventListener("click", () => submitToneChoice(opt, correct));
+    host.appendChild(b);
+  });
+}
+
+function submitToneChoice(picked, correct) {
+  if (!TONE_GAME.active || TONE_GAME.awaitingNext) return;
+  const item = TONE_GAME.current;
+  if (!item) return;
+  const ok = picked === correct;
+  TONE_GAME.awaitingNext = true;
+  $("#btnNextTone").disabled = false;
+  lockToneChoices(correct, picked);
+  recordAttempt(item.id, ok);
+  if (ok) TONE_GAME.correctCount += 1;
+  showToneFeedback(ok, ok ? "✅ Correct" : `❌ Incorrect • Correct: ${correct}`);
+}
+
+function nextToneQuestion() {
+  if (!TONE_GAME.active) return;
+  TONE_GAME.awaitingNext = false;
+  const feedback = $("#toneFeedback");
+  if (feedback) {
+    feedback.classList.add("hidden");
+    feedback.textContent = "";
+  }
+  $("#btnNextTone").disabled = true;
+
+  if (TONE_GAME.idx >= TONE_GAME.questions.length) {
+    endToneGame();
+    return;
+  }
+
+  const item = TONE_GAME.questions[TONE_GAME.idx];
+  TONE_GAME.current = item;
+  $("#toneQuizProgress").textContent = `Question ${TONE_GAME.idx + 1}/${TONE_GAME.questions.length}`;
+  $("#toneQuizSub").textContent = `Correct: ${TONE_GAME.correctCount} • Pool: ${TONE_GAME.pool.length}`;
+  $("#toneQuizCourse").textContent = `HSK 1 • ${item.lesson}`;
+  $("#btnToggleStarTone").textContent = isStarred(item.id) ? "⭐" : "☆";
+  renderToneChoices(item);
+  playItemAudio(item);
+}
+
+function endToneGame() {
+  const total = TONE_GAME.questions.length;
+  const correct = TONE_GAME.correctCount;
+  TONE_GAME.active = false;
+  toast(`Tone game finished: ${correct}/${total}`);
+  renderStats();
+  resetToneGameUI();
+}
+
 function setStarButton(item) {
   const on = isStarred(item.id);
   $("#btnToggleStar").textContent = on ? "⭐" : "☆";
@@ -997,7 +1237,7 @@ function setStarButton(item) {
 
 function maybeAutoplay(q) {
   if (!SETTINGS.autoplay) return;
-  const isChineseQuestion = q.qmode === "jp2en" || q.qmode.startsWith("listen");
+  const isChineseQuestion = q.qmode === "jp2en" || q.qmode.startsWith("listen") || isToneListenMode(q.qmode);
   if (isChineseQuestion) playItemAudio(q.item);
 }
 
@@ -1042,7 +1282,9 @@ function renderMC(q) {
   const dmode = getDMode();
   const { correct, options } = buildMCOptions(q, QUIZ.pool, dmode);
   const host = $("#answerMC");
+  const hasHanziChoices = /[\u3400-\u9fff]/.test(correct);
   host.innerHTML = "";
+  host.classList.toggle("hanziChoices", hasHanziChoices);
   options.forEach((opt, i) => {
     const b = document.createElement("button");
     b.className = "choice";
@@ -1367,9 +1609,37 @@ function wireUI() {
     refreshHeaderCounts(); updateLessonHint(); buildVocabUI(); updateQuestionCountUI();
     updateCurrentAudioListIfOpen();
   });
+  $("#btnSelectAllTone")?.addEventListener("click", () => {
+    $$("#toneLessonList input[type=checkbox]").forEach((x) => x.checked = true);
+    updateToneHint();
+  });
+  $("#btnClearAllTone")?.addEventListener("click", () => {
+    $$("#toneLessonList input[type=checkbox]").forEach((x) => x.checked = false);
+    updateToneHint();
+  });
 
   $("#btnStart").addEventListener("click", () => startQuiz(false));
   $("#btnPracticeStarred").addEventListener("click", () => startQuiz(true));
+  $("#btnStartTone")?.addEventListener("click", startToneQuiz);
+  $("#btnReplayTone")?.addEventListener("click", () => {
+    if (!TONE_GAME.current) return;
+    playItemAudio(TONE_GAME.current);
+  });
+  $("#btnToggleStarTone")?.addEventListener("click", () => {
+    if (!TONE_GAME.current) return;
+    const on = toggleStar(TONE_GAME.current.id);
+    $("#btnToggleStarTone").textContent = on ? "⭐" : "☆";
+  });
+  $("#btnNextTone")?.addEventListener("click", () => {
+    if (!TONE_GAME.active) return;
+    if (!TONE_GAME.awaitingNext) {
+      toast("Pick an answer first.");
+      return;
+    }
+    TONE_GAME.idx += 1;
+    nextToneQuestion();
+  });
+  $("#btnEndTone")?.addEventListener("click", endToneGame);
 
   $("#btnReplay").addEventListener("click", () => {
     if (!QUIZ.current) return;
@@ -1440,9 +1710,15 @@ function wireUI() {
     updateQuestionCountUI();
     updateCurrentAudioListIfOpen();
   });
+  $("#toneStarredOnly")?.addEventListener("change", () => {
+    updateToneHint();
+  });
 
   $("#qAuto").addEventListener("change", () => {
     updateQuestionCountUI();
+  });
+  $("#qModeSelect").addEventListener("change", () => {
+    updateQModeDependencies();
   });
 
   $("#setAudioOn").addEventListener("change", () => {
@@ -1521,8 +1797,14 @@ function wireUI() {
     updateQuestionCountUI();
     updateCurrentAudioListIfOpen();
     if (QUIZ.current) setStarButton(QUIZ.current.item);
+    if (TONE_GAME.current) {
+      $("#btnToggleStarTone").textContent = isStarred(TONE_GAME.current.id) ? "⭐" : "☆";
+    }
     if (QUIZ.active && QUIZ.starFiltered) {
       endQuiz();
+    }
+    if (TONE_GAME.active && $("#toneStarredOnly")?.checked) {
+      endToneGame();
     }
     toast("Stars reset.");
   });
@@ -1539,30 +1821,47 @@ function wireUI() {
     const key = e.key;
     const isTypingMode = QUIZ.active && !$("#answerType").classList.contains("hidden");
     const isMCMode = QUIZ.active && !$("#answerMC").classList.contains("hidden");
+    const isToneMCMode = TONE_GAME.active && !$("#toneGameArea")?.classList.contains("hidden");
 
     if (key === "=") {
-      if (QUIZ.active) {
+      if (QUIZ.active || TONE_GAME.active) {
         e.preventDefault();
         if (QUIZ.current) playItemAudio(QUIZ.current.item);
+        if (TONE_GAME.current) playItemAudio(TONE_GAME.current);
       }
       return;
     }
     if (key === "`") {
-      if (QUIZ.active) {
+      if (QUIZ.active || TONE_GAME.active) {
         e.preventDefault();
         if (QUIZ.current) {
           const on = toggleStar(QUIZ.current.item.id);
           $("#btnToggleStar").textContent = on ? "⭐" : "☆";
         }
+        if (TONE_GAME.current) {
+          const on = toggleStar(TONE_GAME.current.id);
+          $("#btnToggleStarTone").textContent = on ? "⭐" : "☆";
+        }
       }
       return;
     }
 
-    if (isMCMode && ["1","2","3","4"].includes(key)) {
+    if ((isMCMode || isToneMCMode) && ["1","2","3","4"].includes(key)) {
       e.preventDefault();
       const idx = Number(key) - 1;
-      const btn = $$("#answerMC .choice")[idx];
+      const btn = isToneMCMode ? $$("#toneAnswerMC .choice")[idx] : $$("#answerMC .choice")[idx];
       if (btn) btn.click();
+      return;
+    }
+
+    if (key === "Enter" && TONE_GAME.active && !inInput) {
+      e.preventDefault();
+      if (!TONE_GAME.awaitingNext) {
+        toast("Pick an answer first.");
+        return;
+      }
+      TONE_GAME.idx += 1;
+      nextToneQuestion();
       return;
     }
 
@@ -1609,6 +1908,7 @@ function wireUI() {
   });
 
   showView("study");
+  resetToneGameUI();
   applySettingsToUI(SETTINGS);
 }
 
