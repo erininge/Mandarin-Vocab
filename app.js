@@ -1,6 +1,6 @@
-/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.2) */
+/* Kat’s Mandarin Garden 🌸 — HSK 1 (V1.3) */
 
-const APP_VERSION = "V1.2";
+const APP_VERSION = "V1.3";
 const STORAGE = {
   stars: "hsk1_stars_v1_1",
   settings: "hsk1_settings_v1_1",
@@ -490,6 +490,14 @@ function selectedLessonCodes() {
   return $$("#lessonList input[type=checkbox]:checked").map(x => x.value);
 }
 
+function selectedToneLessonCodes() {
+  return $$("#toneLessonList input[type=checkbox]:checked").map(x => x.value);
+}
+
+function isToneLessonCode(code) {
+  return /^h1_t/i.test(String(code || ""));
+}
+
 function currentPool() {
   const codes = selectedLessonCodes();
   let pool = ITEMS.filter(it => codes.includes(lesson_code(it.lesson)));
@@ -497,6 +505,11 @@ function currentPool() {
     pool = pool.filter(it => isStarred(it.id));
   }
   return pool;
+}
+
+function currentTonePool() {
+  const codes = selectedToneLessonCodes();
+  return ITEMS.filter((it) => codes.includes(lesson_code(it.lesson)));
 }
 
 function currentPoolSignature(pool) {
@@ -682,8 +695,10 @@ async function loadData() {
 
 function buildLessonUI() {
   const host = $("#lessonList");
+  const toneHost = $("#toneLessonList");
   host.innerHTML = "";
-  for (const l of LESSONS) {
+  if (toneHost) toneHost.innerHTML = "";
+  for (const l of LESSONS.filter((lesson) => !isToneLessonCode(lesson.code))) {
     const row = document.createElement("label");
     row.className = "lessonRow";
     row.innerHTML = `
@@ -695,13 +710,29 @@ function buildLessonUI() {
     `;
     host.appendChild(row);
   }
+  if (toneHost) {
+    for (const l of LESSONS.filter((lesson) => isToneLessonCode(lesson.code))) {
+      const row = document.createElement("label");
+      row.className = "lessonRow";
+      row.innerHTML = `
+        <span>
+          <input type="checkbox" value="${l.code}" checked />
+          <strong style="margin-left:6px;">${l.name}</strong>
+        </span>
+        <span class="meta">${l.count} items</span>
+      `;
+      toneHost.appendChild(row);
+    }
+  }
   host.addEventListener("change", () => {
     refreshHeaderCounts();
     updateLessonHint();
     buildVocabUI();
     updateQuestionCountUI();
-    updateToneHint();
     updateCurrentAudioListIfOpen();
+  });
+  toneHost?.addEventListener("change", () => {
+    updateToneHint();
   });
   updateLessonHint();
   updateQuestionCountUI();
@@ -713,12 +744,12 @@ function buildLessonUI() {
 
 
 function updateToneHint() {
-  const pool = currentPool();
+  const pool = currentTonePool();
   const starOnly = $("#toneStarredOnly")?.checked;
   const playable = starOnly ? pool.filter((it) => isStarred(it.id)).length : pool.length;
   const audioState = SETTINGS.audioOn ? "Audio on" : "Audio off";
   const hint = $("#toneHint");
-  if (hint) hint.textContent = `${playable} playable item(s) • Uses your Study lesson selection • ${audioState}`;
+  if (hint) hint.textContent = `${playable} playable item(s) • Tone lessons selected • ${audioState}`;
 }
 
 function updateLessonHint() {
@@ -1078,14 +1109,14 @@ function startToneQuiz() {
     toast("Turn on Audio in Settings to play Tone Game.");
     return;
   }
-  const pool0 = currentPool();
+  const pool0 = currentTonePool();
   let pool = pool0;
   const useAuto = $("#toneAuto")?.checked ?? true;
   const countValue = Number($("#toneCount")?.value || 20);
   const starredOnly = $("#toneStarredOnly")?.checked ?? false;
   if (starredOnly) pool = pool.filter((it) => isStarred(it.id));
   if (pool.length === 0) {
-    toast("No items in your selected set.");
+    toast("No items in your selected tone lessons.");
     return;
   }
   const qCount = useAuto ? pool.length : Math.max(1, Math.min(500, countValue));
@@ -1565,21 +1596,26 @@ function wireUI() {
   $("#btnSelectAll").addEventListener("click", () => {
     $$("#lessonList input[type=checkbox]").forEach(x => x.checked = true);
     refreshHeaderCounts(); updateLessonHint(); buildVocabUI(); updateQuestionCountUI();
-    updateToneHint();
     updateCurrentAudioListIfOpen();
   });
   $("#btnClearAll").addEventListener("click", () => {
     $$("#lessonList input[type=checkbox]").forEach(x => x.checked = false);
     refreshHeaderCounts(); updateLessonHint(); buildVocabUI(); updateQuestionCountUI();
-    updateToneHint();
     updateCurrentAudioListIfOpen();
   });
   $("#btnStarredOnly").addEventListener("click", () => {
     $$("#lessonList input[type=checkbox]").forEach(x => x.checked = true);
     $("#filterStarredOnly").checked = true;
     refreshHeaderCounts(); updateLessonHint(); buildVocabUI(); updateQuestionCountUI();
-    updateToneHint();
     updateCurrentAudioListIfOpen();
+  });
+  $("#btnSelectAllTone")?.addEventListener("click", () => {
+    $$("#toneLessonList input[type=checkbox]").forEach((x) => x.checked = true);
+    updateToneHint();
+  });
+  $("#btnClearAllTone")?.addEventListener("click", () => {
+    $$("#toneLessonList input[type=checkbox]").forEach((x) => x.checked = false);
+    updateToneHint();
   });
 
   $("#btnStart").addEventListener("click", () => startQuiz(false));
@@ -1672,8 +1708,10 @@ function wireUI() {
     updateLessonHint();
     buildVocabUI();
     updateQuestionCountUI();
-    updateToneHint();
     updateCurrentAudioListIfOpen();
+  });
+  $("#toneStarredOnly")?.addEventListener("change", () => {
+    updateToneHint();
   });
 
   $("#qAuto").addEventListener("change", () => {
