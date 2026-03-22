@@ -1014,7 +1014,7 @@ function makeQuestion(item, qmode, atype) {
 
 function promptTextForQuestion(q, dmode) {
   const it = q.item;
-  if (q.qmode === "en2jp") return it.en;
+  if (q.qmode === "en2jp" || q.qmode === "en2zh") return it.en;
   if (q.qmode === "jp2en") return jpDisplay(it, displayModeForItem(it, dmode));
   if (isToneListenMode(q.qmode)) return "🎧 Tone listening: which word did you hear?";
   if (q.qmode.startsWith("listen")) return "🎧 Listening… (press =)";
@@ -1026,7 +1026,7 @@ function correctAnswerText(q, dmode) {
   if (isToneListenMode(q.qmode)) {
     return `${it.jp_kana} • ${it.jp_kanji} — ${it.en}`;
   }
-  if (q.qmode === "en2jp" || q.qmode === "listen2jp") {
+  if (q.qmode === "en2jp" || q.qmode === "en2zh" || q.qmode === "listen2jp") {
     return jpDisplay(it, displayModeForItem(it, dmode));
   }
   return it.en;
@@ -1047,7 +1047,7 @@ function buildMCOptions(q, pool, dmode) {
     const distractors = sample(uniq(mapped.filter(Boolean)), 3);
     return { correct, options: shuffle([correct, ...distractors]) };
   }
-  const isJPAnswer = (q.qmode === "en2jp" || q.qmode === "listen2jp");
+  const isJPAnswer = (q.qmode === "en2jp" || q.qmode === "en2zh" || q.qmode === "listen2jp");
   const correct = isJPAnswer ? jpDisplay(it, displayModeForItem(it, dmode)) : it.en;
 
   const others = pool.filter(x => x.id !== it.id);
@@ -1062,7 +1062,7 @@ function buildMCOptions(q, pool, dmode) {
 function gradeTyping(q, user, dmode) {
   const it = q.item;
   if (!SETTINGS.smartGrade) {
-    if (q.qmode === "en2jp" || q.qmode === "listen2jp") {
+    if (q.qmode === "en2jp" || q.qmode === "en2zh" || q.qmode === "listen2jp") {
       const u = (user || "").trim();
       const acceptable = jpAcceptableAnswers(it, "both").map(x => (x || "").trim());
       return acceptable.some(a => a && a === u);
@@ -1191,7 +1191,7 @@ function setSpeakingQuizVisibility(active) {
 }
 
 function speakingPromptTextForQuestion(q, dmode) {
-  if (q.qmode === "jpSpeak") return jpDisplay(q.item, displayModeForItem(q.item, dmode));
+  if (q.qmode === "zhSpeak") return jpDisplay(q.item, displayModeForItem(q.item, dmode));
   return q.item.en;
 }
 
@@ -1228,11 +1228,11 @@ function submitSpeakingAnswer(transcript) {
   const q = SPEAKING.current;
   if (!q) return;
   SPEAKING.awaitingNext = true;
-  const ok = gradeTyping({ ...q, qmode: "en2jp" }, transcript, getSpeakingDMode());
+  const ok = gradeTyping({ ...q, qmode: "en2zh" }, transcript, getSpeakingDMode());
   recordAttempt(q.item.id, ok);
   if (ok) SPEAKING.correctCount += 1;
   $("#btnNextSpeaking").disabled = false;
-  const expected = correctAnswerText({ ...q, qmode: "en2jp" }, getSpeakingDMode());
+  const expected = correctAnswerText({ ...q, qmode: "en2zh" }, getSpeakingDMode());
   const detail = ok ? "✅ Correct" : `❌ Incorrect • Correct: ${expected}`;
   const feedback = $("#speakingFeedback");
   feedback.classList.remove("hidden");
@@ -1264,11 +1264,11 @@ function nextSpeakingQuestion() {
   $("#speakingQuizProgress").textContent = `Question ${SPEAKING.idx + 1}/${SPEAKING.questions.length}`;
   $("#speakingQuizSub").textContent = `Correct: ${SPEAKING.correctCount} • Pool: ${SPEAKING.pool.length}`;
   $("#speakingPrompt").textContent = speakingPromptTextForQuestion(q, dmode);
-  $("#speakingPromptHint").textContent = q.qmode === "jpSpeak"
+  $("#speakingPromptHint").textContent = q.qmode === "zhSpeak"
     ? "Read the Chinese aloud for pronunciation practice."
     : "Speak the Chinese answer.";
   $("#btnToggleStarSpeaking").textContent = isStarred(q.item.id) ? "⭐" : "☆";
-  maybeAutoplay({ qmode: q.qmode === "jpSpeak" ? "jp2en" : "en2jp", item: q.item });
+  maybeAutoplay({ qmode: q.qmode === "zhSpeak" ? "jp2en" : "en2jp", item: q.item });
 }
 
 function startSpeakingRecognition() {
@@ -1326,7 +1326,7 @@ function startSpeakingQuiz() {
   if (qCount > pool.length) {
     toast(`Only ${pool.length} items available — speaking set to ${pool.length}.`);
   }
-  const qmode = $("#speakingQModeSelect")?.value || "en2jp";
+  const qmode = $("#speakingQModeSelect")?.value || "en2zh";
   const questions = shuffle(pool).slice(0, maxCount).map((item) => ({ item, qmode }));
   SPEAKING = {
     active: true,
