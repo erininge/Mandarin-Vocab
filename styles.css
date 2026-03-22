@@ -572,6 +572,20 @@ kbd {
 .quizFooter {
   justify-content: flex-end;
 }
+.speakingControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.speakingMicBtn.is-listening {
+  border-color: rgba(255, 143, 199, 0.65);
+  box-shadow: 0 0 0 3px rgba(255, 143, 199, 0.2), 0 0 20px rgba(255, 143, 199, 0.28);
+}
+#speakingHeard {
+  border-style: dashed;
+}
 
 .tableWrap {
   margin-top: 10px;

@@ -32,6 +32,7 @@
 
     <nav class="nav">
       <button class="navBtn" data-view="study">Study</button>
+      <button class="navBtn" data-view="speaking">Speaking</button>
       <button class="navBtn" data-view="tone">Tone Game</button>
       <button class="navBtn" data-view="vocab">View Vocab</button>
       <button class="navBtn" data-view="stats">Stats</button>
@@ -129,6 +130,86 @@
 
           <div class="row gap quizFooter">
             <button class="btn subtle" id="btnNext" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-speaking" class="view hidden">
+      <div class="card" id="speakingSetup">
+        <div class="cardTitle">Speaking setup</div>
+
+        <div class="grid2">
+          <div>
+            <label class="label">Lessons</label>
+            <div id="speakingLessonList" class="lessonList"></div>
+            <div class="row gap">
+              <button class="btn subtle" id="btnSelectAllSpeaking">Select all</button>
+              <button class="btn subtle" id="btnClearAllSpeaking">Clear</button>
+              <button class="btn subtle" id="btnStarredOnlySpeaking">Starred only</button>
+            </div>
+            <div class="hint" id="speakingLessonHint">—</div>
+            <div class="hint hidden" id="speakingSupportHint"></div>
+          </div>
+
+          <div>
+            <label class="label" for="speakingQModeSelect">Question type</label>
+            <select id="speakingQModeSelect" class="select block">
+              <option value="en2zh" selected>EN → 中文</option>
+              <option value="zhSpeak">中文 speaking practice</option>
+            </select>
+
+            <label class="label" for="speakingDModeSelect">Display mode</label>
+            <select id="speakingDModeSelect" class="select block">
+              <option value="kana" selected>Pinyin</option>
+              <option value="kanji">Hanzi</option>
+              <option value="both">Both</option>
+            </select>
+
+            <div class="row gap">
+              <label class="chip"><input type="checkbox" id="speakingStarredOnly"> Starred only</label>
+              <label class="chip"><input type="checkbox" id="speakingAuto" checked> AUTO</label>
+              <label class="chip">Questions: <input id="speakingCount" class="num" type="number" min="5" max="200" value="20"></label>
+            </div>
+
+            <div class="row gap">
+              <button class="btn primary" id="btnStartSpeaking">Start Speaking</button>
+            </div>
+
+            <div class="hint">Only speech input is used in this mode. Tap the mic, speak, then review what was heard.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="speakingQuizArea" class="quizStage hidden">
+        <div class="quizPanel">
+          <div class="quizTop">
+            <div class="quizMeta">
+              <div class="quizMetaLine">
+                <div class="quizCourse" id="speakingQuizCourse">HSK 1 • Speaking</div>
+                <div class="quizProgress" id="speakingQuizProgress">—</div>
+              </div>
+              <div class="hint" id="speakingQuizSub">—</div>
+            </div>
+            <div class="quizActions">
+              <button class="btn subtle" id="btnReplaySpeaking" title="Replay (=)">🔊</button>
+              <button class="btn subtle" id="btnToggleStarSpeaking" title="Star (`)">☆</button>
+              <button class="btn subtle danger" id="btnEndSpeaking">Quit</button>
+            </div>
+          </div>
+
+          <div id="speakingPrompt" class="prompt">—</div>
+          <div class="hint" id="speakingPromptHint">Speak the answer in Chinese.</div>
+
+          <div class="speakingControls">
+            <button class="btn primary speakingMicBtn" id="btnStartListening">🎙️ Tap to speak</button>
+            <div id="speakingStatus" class="hint">Ready</div>
+          </div>
+          <div id="speakingHeard" class="feedback hidden"></div>
+          <div id="speakingFeedback" class="feedback hidden"></div>
+
+          <div class="row gap quizFooter">
+            <button class="btn subtle" id="btnNextSpeaking" disabled>Next</button>
           </div>
         </div>
       </div>
