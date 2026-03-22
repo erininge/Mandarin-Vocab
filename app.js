@@ -90,6 +90,7 @@ function normJP(s) {
 }
 
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+const SPEAKING_LISTEN_TIMEOUT_MS = 9000;
 
 function speechRecognitionSupportState() {
   if (!SpeechRecognitionCtor) {
@@ -115,8 +116,9 @@ function createSpeechRecognizer({ lang = "zh-CN", onStart, onResult, onError, on
   if (!supportsSpeechRecognition()) return null;
   const recognition = new SpeechRecognitionCtor();
   recognition.lang = lang;
+  recognition.continuous = false;
   recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
+  recognition.maxAlternatives = 3;
   recognition.addEventListener("start", () => onStart?.());
   recognition.addEventListener("result", (event) => {
     const transcript = event.results?.[0]?.[0]?.transcript || "";
@@ -1129,8 +1131,24 @@ let SPEAKING = {
   correctCount: 0,
   recognizer: null,
   listening: false,
-  heard: ""
+  heard: "",
+  listenTimeoutId: null
 };
+
+function clearSpeakingListenTimeout() {
+  if (!SPEAKING.listenTimeoutId) return;
+  clearTimeout(SPEAKING.listenTimeoutId);
+  SPEAKING.listenTimeoutId = null;
+}
+
+function scheduleSpeakingListenTimeout() {
+  clearSpeakingListenTimeout();
+  SPEAKING.listenTimeoutId = setTimeout(() => {
+    if (!SPEAKING.listening) return;
+    stopSpeakingRecognition();
+    setSpeakingListeningState(false, "Listening timed out. Tap to try again.");
+  }, SPEAKING_LISTEN_TIMEOUT_MS);
+}
 
 function resetQuizUI() {
   $("#quizArea").classList.add("hidden");
@@ -1210,6 +1228,7 @@ function speakingPromptTextForQuestion(q, dmode) {
 }
 
 function stopSpeakingRecognition() {
+  clearSpeakingListenTimeout();
   if (!SPEAKING.recognizer) return;
   try {
     SPEAKING.recognizer.stop();
@@ -1287,6 +1306,11 @@ function nextSpeakingQuestion() {
 
 function startSpeakingRecognition() {
   if (!SPEAKING.active || SPEAKING.awaitingNext) return;
+  if (SPEAKING.listening) {
+    stopSpeakingRecognition();
+    setSpeakingListeningState(false, "Listening stopped.");
+    return;
+  }
   const support = speechRecognitionSupportState();
   if (!support.supported) {
     setSpeakingListeningState(false, support.reason);
@@ -1296,7 +1320,10 @@ function startSpeakingRecognition() {
   stopSpeakingRecognition();
   SPEAKING.recognizer = createSpeechRecognizer({
     lang: "zh-CN",
-    onStart: () => setSpeakingListeningState(true, "Listening… speak now."),
+    onStart: () => {
+      setSpeakingListeningState(true, "Listening… speak now.");
+      scheduleSpeakingListenTimeout();
+    },
     onResult: (transcript) => {
       const heard = (transcript || "").trim();
       SPEAKING.heard = heard;
@@ -1305,6 +1332,7 @@ function startSpeakingRecognition() {
       setSpeakingListeningState(false, heard ? "Captured speech." : "No speech detected.");
     },
     onError: (event) => {
+      clearSpeakingListenTimeout();
       const map = {
         not_allowed: "Microphone permission denied.",
         service_not_allowed: "Speech service blocked by browser.",
@@ -1318,6 +1346,7 @@ function startSpeakingRecognition() {
       if (event.error !== "aborted") toast(msg);
     },
     onEnd: () => {
+      clearSpeakingListenTimeout();
       if (!SPEAKING.awaitingNext) {
         setSpeakingListeningState(false, "Ready");
       }
@@ -1360,7 +1389,8 @@ function startSpeakingQuiz() {
     correctCount: 0,
     recognizer: null,
     listening: false,
-    heard: ""
+    heard: "",
+    listenTimeoutId: null
   };
   setSpeakingQuizVisibility(true);
   showView("speaking");
