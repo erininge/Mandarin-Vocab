@@ -91,8 +91,24 @@ function normJP(s) {
 
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
+function speechRecognitionSupportState() {
+  if (!SpeechRecognitionCtor) {
+    return {
+      supported: false,
+      reason: "Speech recognition is not available in this browser. Try Chrome or Edge."
+    };
+  }
+  if (!window.isSecureContext) {
+    return {
+      supported: false,
+      reason: "Speech recognition requires a secure page (HTTPS or localhost)."
+    };
+  }
+  return { supported: true, reason: "" };
+}
+
 function supportsSpeechRecognition() {
-  return !!SpeechRecognitionCtor;
+  return speechRecognitionSupportState().supported;
 }
 
 function createSpeechRecognizer({ lang = "zh-CN", onStart, onResult, onError, onEnd } = {}) {
@@ -851,16 +867,14 @@ function isToneListenMode(mode) {
 }
 
 function updateSpeakingSupportUI() {
-  const supported = supportsSpeechRecognition();
+  const support = speechRecognitionSupportState();
   const hint = $("#speakingSupportHint");
   const startBtn = $("#btnStartSpeaking");
   if (hint) {
-    hint.classList.toggle("hidden", supported);
-    hint.textContent = supported
-      ? ""
-      : "Speech recognition is not available in this browser. Try Chrome or Edge.";
+    hint.classList.toggle("hidden", support.supported);
+    hint.textContent = support.supported ? "" : support.reason;
   }
-  if (startBtn) startBtn.disabled = !supported;
+  if (startBtn) startBtn.disabled = !support.supported;
 }
 
 function updateQModeDependencies() {
@@ -1273,7 +1287,12 @@ function nextSpeakingQuestion() {
 
 function startSpeakingRecognition() {
   if (!SPEAKING.active || SPEAKING.awaitingNext) return;
-  if (!supportsSpeechRecognition()) return;
+  const support = speechRecognitionSupportState();
+  if (!support.supported) {
+    setSpeakingListeningState(false, support.reason);
+    toast(support.reason);
+    return;
+  }
   stopSpeakingRecognition();
   SPEAKING.recognizer = createSpeechRecognizer({
     lang: "zh-CN",
@@ -1290,11 +1309,13 @@ function startSpeakingRecognition() {
         not_allowed: "Microphone permission denied.",
         service_not_allowed: "Speech service blocked by browser.",
         no_speech: "No speech detected. Try again.",
-        audio_capture: "No microphone available."
+        audio_capture: "No microphone available.",
+        network: "Speech recognition needs an internet connection.",
+        aborted: "Listening stopped."
       };
       const msg = map[event.error] || "Speech recognition failed. Try again.";
       setSpeakingListeningState(false, msg);
-      toast(msg);
+      if (event.error !== "aborted") toast(msg);
     },
     onEnd: () => {
       if (!SPEAKING.awaitingNext) {
@@ -1310,8 +1331,9 @@ function startSpeakingRecognition() {
 }
 
 function startSpeakingQuiz() {
-  if (!supportsSpeechRecognition()) {
-    toast("Speech recognition is not supported in this browser.");
+  const support = speechRecognitionSupportState();
+  if (!support.supported) {
+    toast(support.reason);
     return;
   }
   let pool = currentSpeakingPool();
