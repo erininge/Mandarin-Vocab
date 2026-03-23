@@ -1246,6 +1246,7 @@ function resetSpeakingUI() {
   const status = $("#speakingStatus");
   const mic = $("#btnStartListening");
   const retry = $("#btnTryAgainSpeaking");
+  const skip = $("#btnSkipSpeaking");
   if (heard) {
     heard.classList.add("hidden");
     heard.classList.remove("good", "bad");
@@ -1266,6 +1267,7 @@ function resetSpeakingUI() {
     mic.textContent = "🎙️ Tap to speak";
   }
   if (retry) retry.disabled = true;
+  if (skip) skip.disabled = true;
   const next = $("#btnNextSpeaking");
   if (next) next.disabled = true;
 }
@@ -1389,6 +1391,7 @@ function nextSpeakingQuestion() {
   SPEAKING.attemptsForCurrent = 0;
   $("#btnNextSpeaking").disabled = true;
   $("#btnTryAgainSpeaking").disabled = true;
+  $("#btnSkipSpeaking").disabled = false;
   const heard = $("#speakingHeard");
   const feedback = $("#speakingFeedback");
   heard?.classList.add("hidden");
@@ -1522,6 +1525,14 @@ function endSpeakingQuiz() {
   toast(`Speaking finished: ${correct}/${total}`);
   renderStats();
   resetSpeakingUI();
+}
+
+function skipSpeakingQuestion() {
+  if (!SPEAKING.active) return;
+  stopSpeakingRecognition();
+  SPEAKING.awaitingNext = false;
+  SPEAKING.idx += 1;
+  nextSpeakingQuestion();
 }
 
 function setQuizVisibility(active) {
@@ -2126,6 +2137,10 @@ function wireUI() {
     $("#speakingFeedback")?.classList.add("hidden");
     setSpeakingListeningState(false, "Try again — focus on tones.");
     startSpeakingRecognition();
+  });
+  $("#btnSkipSpeaking")?.addEventListener("click", () => {
+    if (!SPEAKING.active) return;
+    skipSpeakingQuestion();
   });
   $("#btnEndSpeaking")?.addEventListener("click", endSpeakingQuiz);
   $("#btnStartTone")?.addEventListener("click", startToneQuiz);
