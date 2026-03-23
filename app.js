@@ -117,12 +117,22 @@ function createSpeechRecognizer({ lang = "zh-CN", onStart, onResult, onError, on
   const recognition = new SpeechRecognitionCtor();
   recognition.lang = lang;
   recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 3;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 5;
   recognition.addEventListener("start", () => onStart?.());
   recognition.addEventListener("result", (event) => {
-    const transcript = event.results?.[0]?.[0]?.transcript || "";
-    onResult?.(transcript, event);
+    const finalTranscript = [];
+    const fallbackTranscript = [];
+    const startIndex = Number.isInteger(event.resultIndex) ? event.resultIndex : 0;
+    for (let i = startIndex; i < (event.results?.length || 0); i += 1) {
+      const result = event.results[i];
+      const text = result?.[0]?.transcript || "";
+      if (result?.isFinal) finalTranscript.push(text);
+      else fallbackTranscript.push(text);
+    }
+    const hasFinal = finalTranscript.length > 0;
+    const transcript = (finalTranscript.join(" ") || fallbackTranscript.join(" ")).trim();
+    onResult?.(transcript, event, hasFinal);
   });
   recognition.addEventListener("error", (event) => onError?.(event));
   recognition.addEventListener("end", () => onEnd?.());
@@ -1324,7 +1334,11 @@ function startSpeakingRecognition() {
       setSpeakingListeningState(true, "Listening… speak now.");
       scheduleSpeakingListenTimeout();
     },
-    onResult: (transcript) => {
+    onResult: (transcript, _event, hasFinal) => {
+      if (!hasFinal) {
+        setSpeakingListeningState(true, transcript ? `Listening… heard: ${transcript}` : "Listening… speak now.");
+        return;
+      }
       const heard = (transcript || "").trim();
       SPEAKING.heard = heard;
       showSpeakingHeard(heard);
