@@ -1142,7 +1142,8 @@ let SPEAKING = {
   recognizer: null,
   listening: false,
   heard: "",
-  listenTimeoutId: null
+  listenTimeoutId: null,
+  attemptsForCurrent: 0
 };
 
 function clearSpeakingListenTimeout() {
@@ -1204,6 +1205,7 @@ function resetSpeakingUI() {
   const sub = $("#speakingQuizSub");
   const status = $("#speakingStatus");
   const mic = $("#btnStartListening");
+  const retry = $("#btnTryAgainSpeaking");
   if (heard) {
     heard.classList.add("hidden");
     heard.classList.remove("good", "bad");
@@ -1223,6 +1225,7 @@ function resetSpeakingUI() {
     mic.classList.remove("is-listening");
     mic.textContent = "🎙️ Tap to speak";
   }
+  if (retry) retry.disabled = true;
   const next = $("#btnNextSpeaking");
   if (next) next.disabled = true;
 }
@@ -1266,29 +1269,42 @@ function showSpeakingHeard(text) {
   heard.textContent = text ? `Heard: “${text}”` : "Heard: (no speech detected)";
 }
 
+function updateSpeakingProgressMeta() {
+  if (!SPEAKING.current) return;
+  $("#speakingQuizProgress").textContent = `Question ${SPEAKING.idx + 1}/${SPEAKING.questions.length}`;
+  const tries = SPEAKING.attemptsForCurrent;
+  const triesText = tries === 1 ? "1 try" : `${tries} tries`;
+  $("#speakingQuizSub").textContent = `Correct: ${SPEAKING.correctCount} • Pool: ${SPEAKING.pool.length} • ${triesText}`;
+}
+
 function submitSpeakingAnswer(transcript) {
   if (!SPEAKING.active || SPEAKING.awaitingNext) return;
   const q = SPEAKING.current;
-  if (!q) return;
-  SPEAKING.awaitingNext = true;
+  if (!q) return null;
   const ok = gradeTyping({ ...q, qmode: "en2zh" }, transcript, getSpeakingDMode());
+  SPEAKING.attemptsForCurrent += 1;
+  updateSpeakingProgressMeta();
   recordAttempt(q.item.id, ok);
   if (ok) SPEAKING.correctCount += 1;
-  $("#btnNextSpeaking").disabled = false;
-  const expected = correctAnswerText({ ...q, qmode: "en2zh" }, getSpeakingDMode());
-  const detail = ok ? "✅ Correct" : `❌ Incorrect • Correct: ${expected}`;
+  SPEAKING.awaitingNext = ok;
+  $("#btnNextSpeaking").disabled = !ok;
+  $("#btnTryAgainSpeaking").disabled = ok;
+  const detail = ok ? "✅ Correct" : "❌ Not quite — tap Try Again and match the tones.";
   const feedback = $("#speakingFeedback");
   feedback.classList.remove("hidden");
   feedback.classList.toggle("good", ok);
   feedback.classList.toggle("bad", !ok);
   feedback.textContent = detail;
+  return ok;
 }
 
 function nextSpeakingQuestion() {
   if (!SPEAKING.active) return;
   SPEAKING.awaitingNext = false;
   SPEAKING.heard = "";
+  SPEAKING.attemptsForCurrent = 0;
   $("#btnNextSpeaking").disabled = true;
+  $("#btnTryAgainSpeaking").disabled = true;
   const heard = $("#speakingHeard");
   const feedback = $("#speakingFeedback");
   heard?.classList.add("hidden");
@@ -1304,8 +1320,7 @@ function nextSpeakingQuestion() {
   SPEAKING.current = q;
   const dmode = getSpeakingDMode();
   $("#speakingQuizCourse").textContent = `HSK 1 • ${q.item.lesson}`;
-  $("#speakingQuizProgress").textContent = `Question ${SPEAKING.idx + 1}/${SPEAKING.questions.length}`;
-  $("#speakingQuizSub").textContent = `Correct: ${SPEAKING.correctCount} • Pool: ${SPEAKING.pool.length}`;
+  updateSpeakingProgressMeta();
   $("#speakingPrompt").textContent = speakingPromptTextForQuestion(q, dmode);
   $("#speakingPromptHint").textContent = q.qmode === "zhSpeak"
     ? "Read the Chinese aloud for pronunciation practice."
@@ -1342,8 +1357,10 @@ function startSpeakingRecognition() {
       const heard = (transcript || "").trim();
       SPEAKING.heard = heard;
       showSpeakingHeard(heard);
-      submitSpeakingAnswer(heard);
-      setSpeakingListeningState(false, heard ? "Captured speech." : "No speech detected.");
+      const ok = submitSpeakingAnswer(heard);
+      if (!heard) setSpeakingListeningState(false, "No speech detected.");
+      else if (ok) setSpeakingListeningState(false, "Captured speech.");
+      else setSpeakingListeningState(false, "Not quite — tap Try Again.");
     },
     onError: (event) => {
       clearSpeakingListenTimeout();
@@ -1404,7 +1421,8 @@ function startSpeakingQuiz() {
     recognizer: null,
     listening: false,
     heard: "",
-    listenTimeoutId: null
+    listenTimeoutId: null,
+    attemptsForCurrent: 0
   };
   setSpeakingQuizVisibility(true);
   showView("speaking");
@@ -2016,6 +2034,13 @@ function wireUI() {
     }
     SPEAKING.idx += 1;
     nextSpeakingQuestion();
+  });
+  $("#btnTryAgainSpeaking")?.addEventListener("click", () => {
+    if (!SPEAKING.active || SPEAKING.awaitingNext) return;
+    $("#speakingHeard")?.classList.add("hidden");
+    $("#speakingFeedback")?.classList.add("hidden");
+    setSpeakingListeningState(false, "Try again — focus on tones.");
+    startSpeakingRecognition();
   });
   $("#btnEndSpeaking")?.addEventListener("click", endSpeakingQuiz);
   $("#btnStartTone")?.addEventListener("click", startToneQuiz);
