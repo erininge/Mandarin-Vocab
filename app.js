@@ -129,6 +129,72 @@ function normalizePinyinText(text) {
     .toLowerCase();
 }
 
+function parsePinyinSyllable(syllable) {
+  const src = String(syllable || "").trim();
+  if (!src) return null;
+  const chars = [];
+  let tone = 5;
+  for (const ch of src) {
+    if (/[1-5]/.test(ch)) {
+      tone = Number(ch);
+      continue;
+    }
+    const mapped = PINYIN_TONE_MAP[ch];
+    if (mapped) {
+      chars.push(mapped[0]);
+      tone = mapped[1];
+    } else {
+      chars.push(ch.toLowerCase());
+    }
+  }
+  const base = chars.join("").replace(/[^a-zü:]/g, "");
+  if (!base) return null;
+  const nucleus = (base.match(/[aeiouü]/) || [base[0]])[0];
+  return { raw: src, base, tone, nucleus };
+}
+
+function pinyinSyllables(text) {
+  return String(text || "")
+    .split(/[\s·•\-—]+/)
+    .map(parsePinyinSyllable)
+    .filter(Boolean);
+}
+
+function toneContourText(tone) {
+  if (tone === 1) return "flat/high";
+  if (tone === 2) return "rising (like a question)";
+  if (tone === 3) return "dip then rise";
+  if (tone === 4) return "falling";
+  return "light/neutral";
+}
+
+function toneOrdinal(tone) {
+  if (tone === 1) return "1st";
+  if (tone === 2) return "2nd";
+  if (tone === 3) return "3rd";
+  if (tone === 4) return "4th";
+  return "neutral";
+}
+
+function buildToneSpecificHint(expectedPinyin, heardPinyin) {
+  const expected = pinyinSyllables(expectedPinyin);
+  const heard = pinyinSyllables(heardPinyin);
+  if (!expected.length || !heard.length) return "";
+  const max = Math.min(expected.length, heard.length);
+  for (let i = 0; i < max; i += 1) {
+    const ex = expected[i];
+    const hd = heard[i];
+    if (ex.base !== hd.base) continue;
+    if (ex.tone !== hd.tone) {
+      return `On “${ex.base}” (${ex.nucleus}), you used ${toneOrdinal(hd.tone)} tone (${toneContourText(hd.tone)}), but it should be ${toneOrdinal(ex.tone)} tone (${toneContourText(ex.tone)}).`;
+    }
+  }
+  if (expected.length !== heard.length) {
+    return `You said ${heard.length} syllable(s), but the target has ${expected.length}. Try pacing each syllable clearly.`;
+  }
+  return "";
+}
+
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 const SPEAKING_LISTEN_TIMEOUT_MS = 9000;
 
@@ -1308,7 +1374,12 @@ function showSpeakingHeard(text) {
   if (!heard) return;
   heard.classList.remove("hidden");
   heard.classList.remove("good", "bad");
-  heard.textContent = text ? `Heard: “${text}”` : "Heard: (no speech detected)";
+  const pinyin = getHeardPinyinGuess(text);
+  if (!text) {
+    heard.textContent = "Heard: (no speech detected)";
+    return;
+  }
+  heard.textContent = pinyin ? `Heard: “${text}” • Pinyin: ${pinyin}` : `Heard: “${text}”`;
 }
 
 function setSpeakingToneHint(message = "", isBad = false) {
@@ -1325,17 +1396,26 @@ function setSpeakingToneHint(message = "", isBad = false) {
   hint.textContent = message;
 }
 
-function findSpeakingToneMatch(transcript, currentItem) {
-  if (!transcript || !currentItem || !SPEAKING.pool?.length) return null;
+function findSpeakingHeardMatch(transcript, { currentItem = null, excludeCurrent = false } = {}) {
+  if (!transcript || !SPEAKING.pool?.length) return null;
   const heardJP = normJP(transcript);
   const heardPinyin = normalizePinyinText(transcript);
   return SPEAKING.pool.find((candidate) => {
-    if (candidate.id === currentItem.id) return false;
+    if (excludeCurrent && currentItem && candidate.id === currentItem.id) return false;
     const jpMatches = normJP(candidate.jp_kanji) === heardJP;
     if (jpMatches) return true;
     const pyMatches = normalizePinyinText(candidate.jp_kana) === heardPinyin;
     return pyMatches;
   }) || null;
+}
+
+function getHeardPinyinGuess(transcript) {
+  if (!transcript) return "";
+  const matchedItem = findSpeakingHeardMatch(transcript);
+  if (matchedItem?.jp_kana) return matchedItem.jp_kana;
+  const parsed = pinyinSyllables(transcript);
+  if (parsed.length) return parsed.map((x) => x.raw).join(" ");
+  return "";
 }
 
 function updateSpeakingProgressMeta() {
@@ -1367,16 +1447,18 @@ function submitSpeakingAnswer(transcript) {
   if (ok) {
     setSpeakingToneHint(`Tone pattern matched: ${q.item.jp_kana} (${pinyinTonePattern(q.item.jp_kana)}).`);
   } else {
-    const heardMatch = findSpeakingToneMatch(transcript, q.item);
+    const heardMatch = findSpeakingHeardMatch(transcript, { currentItem: q.item, excludeCurrent: true });
     const expectedPattern = pinyinTonePattern(q.item.jp_kana);
+    const heardPinyin = heardMatch?.jp_kana || getHeardPinyinGuess(transcript);
+    const specificHint = heardPinyin ? buildToneSpecificHint(q.item.jp_kana, heardPinyin) : "";
     if (heardMatch) {
       setSpeakingToneHint(
-        `Hint: mic likely heard “${heardMatch.jp_kanji}” (${heardMatch.jp_kana}, ${pinyinTonePattern(heardMatch.jp_kana)}). Target is ${q.item.jp_kanji} (${q.item.jp_kana}, ${expectedPattern}).`,
+        `Hint: mic likely heard “${heardMatch.jp_kanji}” (${heardMatch.jp_kana}, ${pinyinTonePattern(heardMatch.jp_kana)}). Target is ${q.item.jp_kanji} (${q.item.jp_kana}, ${expectedPattern}). ${specificHint}`,
         true
       );
     } else {
       setSpeakingToneHint(
-        `Hint: target tones are ${expectedPattern} (${q.item.jp_kana}). Slow down and exaggerate each tone contour.`,
+        specificHint || `Hint: target tones are ${expectedPattern} (${q.item.jp_kana}). Slow down and exaggerate each tone contour.`,
         true
       );
     }
