@@ -370,6 +370,9 @@ body::before {
   line-height: 1.4;
   margin-top: 8px;
 }
+.hint.bad {
+  color: #ffb6c9;
+}
 kbd {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 11px;

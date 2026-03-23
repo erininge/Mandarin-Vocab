@@ -89,6 +89,46 @@ function normJP(s) {
     .trim();
 }
 
+const PINYIN_TONE_MAP = {
+  ā: ["a", 1], á: ["a", 2], ǎ: ["a", 3], à: ["a", 4],
+  ē: ["e", 1], é: ["e", 2], ě: ["e", 3], è: ["e", 4],
+  ī: ["i", 1], í: ["i", 2], ǐ: ["i", 3], ì: ["i", 4],
+  ō: ["o", 1], ó: ["o", 2], ǒ: ["o", 3], ò: ["o", 4],
+  ū: ["u", 1], ú: ["u", 2], ǔ: ["u", 3], ù: ["u", 4],
+  ǖ: ["ü", 1], ǘ: ["ü", 2], ǚ: ["ü", 3], ǜ: ["ü", 4],
+  ü: ["ü", 5], Ā: ["a", 1], Á: ["a", 2], Ǎ: ["a", 3], À: ["a", 4],
+  Ē: ["e", 1], É: ["e", 2], Ě: ["e", 3], È: ["e", 4],
+  Ī: ["i", 1], Í: ["i", 2], Ǐ: ["i", 3], Ì: ["i", 4],
+  Ō: ["o", 1], Ó: ["o", 2], Ǒ: ["o", 3], Ò: ["o", 4],
+  Ū: ["u", 1], Ú: ["u", 2], Ǔ: ["u", 3], Ù: ["u", 4],
+  Ǖ: ["ü", 1], Ǘ: ["ü", 2], Ǚ: ["ü", 3], Ǜ: ["ü", 4]
+};
+
+function pinyinTonePattern(text) {
+  const src = String(text || "");
+  const parts = src.split(/[\s·•\-—]+/).filter(Boolean);
+  return parts
+    .map((part) => {
+      const numMatch = part.match(/[1-5]/);
+      if (numMatch) return Number(numMatch[0]);
+      for (const ch of part) {
+        const mapped = PINYIN_TONE_MAP[ch];
+        if (mapped) return mapped[1];
+      }
+      return 5;
+    })
+    .join("-");
+}
+
+function normalizePinyinText(text) {
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ü/g, "u:")
+    .replace(/[^a-zA-Z0-9:]/g, "")
+    .toLowerCase();
+}
+
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 const SPEAKING_LISTEN_TIMEOUT_MS = 9000;
 
@@ -1206,6 +1246,7 @@ function resetSpeakingUI() {
   const status = $("#speakingStatus");
   const mic = $("#btnStartListening");
   const retry = $("#btnTryAgainSpeaking");
+  const skip = $("#btnSkipSpeaking");
   if (heard) {
     heard.classList.add("hidden");
     heard.classList.remove("good", "bad");
@@ -1226,6 +1267,7 @@ function resetSpeakingUI() {
     mic.textContent = "🎙️ Tap to speak";
   }
   if (retry) retry.disabled = true;
+  if (skip) skip.disabled = true;
   const next = $("#btnNextSpeaking");
   if (next) next.disabled = true;
 }
@@ -1269,6 +1311,33 @@ function showSpeakingHeard(text) {
   heard.textContent = text ? `Heard: “${text}”` : "Heard: (no speech detected)";
 }
 
+function setSpeakingToneHint(message = "", isBad = false) {
+  const hint = $("#speakingToneHint");
+  if (!hint) return;
+  if (!message) {
+    hint.classList.add("hidden");
+    hint.classList.remove("bad");
+    hint.textContent = "";
+    return;
+  }
+  hint.classList.remove("hidden");
+  hint.classList.toggle("bad", isBad);
+  hint.textContent = message;
+}
+
+function findSpeakingToneMatch(transcript, currentItem) {
+  if (!transcript || !currentItem || !SPEAKING.pool?.length) return null;
+  const heardJP = normJP(transcript);
+  const heardPinyin = normalizePinyinText(transcript);
+  return SPEAKING.pool.find((candidate) => {
+    if (candidate.id === currentItem.id) return false;
+    const jpMatches = normJP(candidate.jp_kanji) === heardJP;
+    if (jpMatches) return true;
+    const pyMatches = normalizePinyinText(candidate.jp_kana) === heardPinyin;
+    return pyMatches;
+  }) || null;
+}
+
 function updateSpeakingProgressMeta() {
   if (!SPEAKING.current) return;
   $("#speakingQuizProgress").textContent = `Question ${SPEAKING.idx + 1}/${SPEAKING.questions.length}`;
@@ -1295,6 +1364,23 @@ function submitSpeakingAnswer(transcript) {
   feedback.classList.toggle("good", ok);
   feedback.classList.toggle("bad", !ok);
   feedback.textContent = detail;
+  if (ok) {
+    setSpeakingToneHint(`Tone pattern matched: ${q.item.jp_kana} (${pinyinTonePattern(q.item.jp_kana)}).`);
+  } else {
+    const heardMatch = findSpeakingToneMatch(transcript, q.item);
+    const expectedPattern = pinyinTonePattern(q.item.jp_kana);
+    if (heardMatch) {
+      setSpeakingToneHint(
+        `Hint: mic likely heard “${heardMatch.jp_kanji}” (${heardMatch.jp_kana}, ${pinyinTonePattern(heardMatch.jp_kana)}). Target is ${q.item.jp_kanji} (${q.item.jp_kana}, ${expectedPattern}).`,
+        true
+      );
+    } else {
+      setSpeakingToneHint(
+        `Hint: target tones are ${expectedPattern} (${q.item.jp_kana}). Slow down and exaggerate each tone contour.`,
+        true
+      );
+    }
+  }
   return ok;
 }
 
@@ -1305,10 +1391,12 @@ function nextSpeakingQuestion() {
   SPEAKING.attemptsForCurrent = 0;
   $("#btnNextSpeaking").disabled = true;
   $("#btnTryAgainSpeaking").disabled = true;
+  $("#btnSkipSpeaking").disabled = false;
   const heard = $("#speakingHeard");
   const feedback = $("#speakingFeedback");
   heard?.classList.add("hidden");
   feedback?.classList.add("hidden");
+  setSpeakingToneHint("");
   setSpeakingListeningState(false, "Ready");
 
   if (SPEAKING.idx >= SPEAKING.questions.length) {
@@ -1437,6 +1525,14 @@ function endSpeakingQuiz() {
   toast(`Speaking finished: ${correct}/${total}`);
   renderStats();
   resetSpeakingUI();
+}
+
+function skipSpeakingQuestion() {
+  if (!SPEAKING.active) return;
+  stopSpeakingRecognition();
+  SPEAKING.awaitingNext = false;
+  SPEAKING.idx += 1;
+  nextSpeakingQuestion();
 }
 
 function setQuizVisibility(active) {
@@ -2041,6 +2137,10 @@ function wireUI() {
     $("#speakingFeedback")?.classList.add("hidden");
     setSpeakingListeningState(false, "Try again — focus on tones.");
     startSpeakingRecognition();
+  });
+  $("#btnSkipSpeaking")?.addEventListener("click", () => {
+    if (!SPEAKING.active) return;
+    skipSpeakingQuestion();
   });
   $("#btnEndSpeaking")?.addEventListener("click", endSpeakingQuiz);
   $("#btnStartTone")?.addEventListener("click", startToneQuiz);
