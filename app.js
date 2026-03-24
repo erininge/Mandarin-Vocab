@@ -245,10 +245,8 @@ function createSpeechRecognizer({ lang = "zh-CN", onStart, onResult, onError, on
   return recognition;
 }
 
-const AUDIO_EXTENSIONS = ["wav", "mp3", "m4a", "ogg"];
+const MANDARIN_AUDIO_BASE = "audio-cmn/96k/hsk";
 const AUDIO_SRC_CACHE = new Map();
-let AUDIO_FALLBACK_MAP = null;
-let AUDIO_FALLBACK_LOADING = null;
 let CURRENT_AUDIO_ENTRIES = [];
 let CURRENT_AUDIO_SIGNATURE = "";
 let SW_REGISTRATION = null;
@@ -321,83 +319,40 @@ async function audioUrlExists(url) {
   }
 }
 
-function audioIdVariants(id) {
-  const variants = [id];
-  if (id?.startsWith("hsk1_")) {
-    variants.push(id.replace(/^hsk1_/, "hsk1_"));
-  }
-  return variants;
+function mandarinHanziForItem(item) {
+  return String(item?.jp_kanji || "").trim();
 }
 
 function audioIdForItem(item) {
-  return item?.audio_id || item?.audioId || item?.id;
+  return mandarinHanziForItem(item) || item?.id || "";
 }
 
-async function loadAudioFallbackMap() {
-  if (AUDIO_FALLBACK_MAP) return AUDIO_FALLBACK_MAP;
-  if (AUDIO_FALLBACK_LOADING) return AUDIO_FALLBACK_LOADING;
-  AUDIO_FALLBACK_LOADING = (async () => {
-    try {
-      const res = await fetch("./audio/audio_rename_report.json", { cache: "no-store" });
-      if (!res.ok) {
-        AUDIO_FALLBACK_MAP = new Map();
-        return AUDIO_FALLBACK_MAP;
-      }
-      const data = await res.json();
-      const map = new Map();
-      (data.renamed || []).forEach((entry) => {
-        if (entry.itemId && entry.from) {
-          map.set(entry.itemId, entry.from);
-        }
-      });
-      AUDIO_FALLBACK_MAP = map;
-      return map;
-    } catch {
-      AUDIO_FALLBACK_MAP = new Map();
-      return AUDIO_FALLBACK_MAP;
-    }
-  })();
-  return AUDIO_FALLBACK_LOADING;
+function mandarinAudioPathForItem(item) {
+  const hanzi = mandarinHanziForItem(item);
+  if (!hanzi) return "";
+  return `${MANDARIN_AUDIO_BASE}/cmn-${hanzi}.mp3`;
 }
 
-async function resolveAudioUrl(id) {
-  if (AUDIO_SRC_CACHE.has(id)) return AUDIO_SRC_CACHE.get(id);
-  const variants = audioIdVariants(id);
-  for (const variant of variants) {
-    for (const ext of AUDIO_EXTENSIONS) {
-      const url = `./audio/${variant}.${ext}`;
-      if (await audioUrlExists(url)) {
-        AUDIO_SRC_CACHE.set(id, url);
-        return url;
-      }
-    }
-  }
-  const fallbackMap = await loadAudioFallbackMap();
-  const fallbackPath = fallbackMap.get(id);
-  if (fallbackPath) {
-    const url = fallbackPath.startsWith("audio/") ? `./${fallbackPath}` : fallbackPath;
-    if (await audioUrlExists(url)) {
-      AUDIO_SRC_CACHE.set(id, url);
-      return url;
-    }
-  }
-  AUDIO_SRC_CACHE.set(id, null);
-  return null;
+async function resolveAudioUrl(item) {
+  const relativePath = mandarinAudioPathForItem(item);
+  if (!relativePath) return null;
+  if (AUDIO_SRC_CACHE.has(relativePath)) return AUDIO_SRC_CACHE.get(relativePath);
+  const url = `./${relativePath}`;
+  const resolved = (await audioUrlExists(url)) ? url : null;
+  AUDIO_SRC_CACHE.set(relativePath, resolved);
+  return resolved;
 }
 
 function clearAudioCache() {
   AUDIO_SRC_CACHE.clear();
-  AUDIO_FALLBACK_MAP = null;
-  AUDIO_FALLBACK_LOADING = null;
 }
 
-async function hasAudioFile(id) {
-  return !!(await resolveAudioUrl(id));
+async function hasAudioFile(item) {
+  return !!(await resolveAudioUrl(item));
 }
 
-function expectedAudioFilename(id) {
-  const ext = AUDIO_EXTENSIONS[0] || "wav";
-  return `audio/${id}.${ext}`;
+function expectedAudioFilename(item) {
+  return mandarinAudioPathForItem(item) || `${MANDARIN_AUDIO_BASE}/cmn-<hanzi>.mp3`;
 }
 
 function displayAudioFilename(url) {
@@ -727,8 +682,7 @@ function renderCurrentAudioList(entries) {
     filtered.forEach(({ item, url }) => {
       const row = document.createElement("div");
       row.className = "audioRow";
-      const audioId = audioIdForItem(item);
-      const filename = url ? displayAudioFilename(url) : expectedAudioFilename(audioId);
+      const filename = url ? displayAudioFilename(url) : expectedAudioFilename(item);
       row.innerHTML = `
         <div>
           <div class="audioRowTitle">${jpDisplay(item, "both")}</div>
@@ -787,9 +741,8 @@ async function buildCurrentAudioList({ force = false } = {}) {
 
   clearAudioCache();
   const entries = await Promise.all(pool.map(async (item) => {
-    const audioId = audioIdForItem(item);
-    const url = await resolveAudioUrl(audioId);
-    return { item, url, audioId };
+    const url = await resolveAudioUrl(item);
+    return { item, url };
   }));
   CURRENT_AUDIO_ENTRIES = entries;
   CURRENT_AUDIO_SIGNATURE = signature;
@@ -1085,7 +1038,7 @@ async function playItemAudio(item) {
     audioSeqToken++;
     const myToken = audioSeqToken;
     const audioId = audioIdForItem(item);
-    const src = await resolveAudioUrl(audioId);
+    const src = await resolveAudioUrl(item);
     if (!src) {
       toast(`Missing audio for ${audioId}.`);
       return;
@@ -2099,9 +2052,9 @@ async function updateVocabAudioHints(rows) {
     const audioId = audioIdForItem(item);
     const hintEl = row.querySelector(".audioHint");
     if (!hintEl) continue;
-    const url = await resolveAudioUrl(audioId);
+    const url = await resolveAudioUrl(item);
     if (myToken !== vocabAudioToken) return;
-    const filename = url ? displayAudioFilename(url) : expectedAudioFilename(audioId);
+    const filename = url ? displayAudioFilename(url) : expectedAudioFilename(item);
     hintEl.textContent = audioId !== id ? `ID: ${id} • Audio: ${filename}` : filename;
   }
 }
@@ -2378,17 +2331,17 @@ function wireUI() {
     const summary = $("#audioCheckSummary");
     summary.textContent = "Checking audio files…";
     clearAudioCache();
-    const ids = ITEMS.map((item) => audioIdForItem(item));
+    const items = ITEMS.slice();
     let found = 0;
     const missing = [];
-    for (const id of ids) {
-      if (await hasAudioFile(id)) {
+    for (const item of items) {
+      if (await hasAudioFile(item)) {
         found += 1;
       } else {
-        missing.push(id);
+        missing.push(audioIdForItem(item));
       }
     }
-    summary.textContent = `Found ${found}/${ids.length} audio files.`;
+    summary.textContent = `Found ${found}/${items.length} audio files.`;
     if (missing.length) {
       console.warn("Missing audio files (first 10):", missing.slice(0, 10));
     }
