@@ -58,7 +58,9 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== location.origin) return;
 
   const isLesson = url.pathname.includes("/lessons/") && url.pathname.endsWith(".json");
-  const isAudio = url.pathname.includes("/audio/") && /\.(wav|mp3|m4a|ogg)$/.test(url.pathname);
+  const isAudio =
+    (url.pathname.includes("/audio-cmn/") && /\.mp3$/i.test(url.pathname)) ||
+    (url.pathname.includes("/audio/") && /\.(wav|mp3|m4a|ogg)$/i.test(url.pathname));
 
   if (isLesson || isAudio) {
     event.respondWith((async () => {
