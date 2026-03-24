@@ -309,11 +309,8 @@ async function audioUrlExists(url) {
   try {
     const head = await fetch(url, { method: "HEAD", cache: "no-store" });
     if (head.ok) return true;
-    if ([403, 405].includes(head.status)) {
-      const getRes = await fetch(url, { method: "GET", cache: "no-store" });
-      return getRes.ok;
-    }
-    return false;
+    const getRes = await fetch(url, { method: "GET", cache: "no-store" });
+    return getRes.ok;
   } catch {
     return false;
   }
@@ -327,19 +324,30 @@ function audioIdForItem(item) {
   return mandarinHanziForItem(item) || item?.id || "";
 }
 
-function mandarinAudioPathForItem(item) {
+function mandarinAudioPathCandidatesForItem(item) {
   const hanzi = mandarinHanziForItem(item);
-  if (!hanzi) return "";
-  return `${MANDARIN_AUDIO_BASE}/cmn-${hanzi}.mp3`;
+  if (!hanzi) return [];
+  return [
+    `${MANDARIN_AUDIO_BASE}/cmn-${hanzi}.mp3`,
+    `${MANDARIN_AUDIO_BASE}/mn-${hanzi}.mp3`
+  ];
 }
 
 async function resolveAudioUrl(item) {
-  const relativePath = mandarinAudioPathForItem(item);
-  if (!relativePath) return null;
-  if (AUDIO_SRC_CACHE.has(relativePath)) return AUDIO_SRC_CACHE.get(relativePath);
-  const url = `./${relativePath}`;
-  const resolved = (await audioUrlExists(url)) ? url : null;
-  AUDIO_SRC_CACHE.set(relativePath, resolved);
+  const relativePaths = mandarinAudioPathCandidatesForItem(item);
+  if (!relativePaths.length) return null;
+  const cacheKey = relativePaths.join("|");
+  if (AUDIO_SRC_CACHE.has(cacheKey)) return AUDIO_SRC_CACHE.get(cacheKey);
+
+  let resolved = null;
+  for (const relativePath of relativePaths) {
+    const url = `./${relativePath}`;
+    if (await audioUrlExists(url)) {
+      resolved = url;
+      break;
+    }
+  }
+  AUDIO_SRC_CACHE.set(cacheKey, resolved);
   return resolved;
 }
 
@@ -352,7 +360,8 @@ async function hasAudioFile(item) {
 }
 
 function expectedAudioFilename(item) {
-  return mandarinAudioPathForItem(item) || `${MANDARIN_AUDIO_BASE}/cmn-<hanzi>.mp3`;
+  const [primaryPath] = mandarinAudioPathCandidatesForItem(item);
+  return primaryPath || `${MANDARIN_AUDIO_BASE}/cmn-<hanzi>.mp3`;
 }
 
 function displayAudioFilename(url) {
