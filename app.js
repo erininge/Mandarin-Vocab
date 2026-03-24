@@ -881,7 +881,7 @@ function buildLessonUI() {
   if (toneHost) toneHost.innerHTML = "";
   if (speakingHost) speakingHost.innerHTML = "";
   for (const l of LESSONS.filter((lesson) => !isToneLessonCode(lesson.code))) {
-    [host, speakingHost].filter(Boolean).forEach((target) => {
+    [host].filter(Boolean).forEach((target) => {
       const row = document.createElement("label");
       row.className = "lessonRow";
       row.innerHTML = `
@@ -893,6 +893,20 @@ function buildLessonUI() {
       `;
       target.appendChild(row);
     });
+  }
+  if (speakingHost) {
+    for (const l of LESSONS) {
+      const row = document.createElement("label");
+      row.className = "lessonRow";
+      row.innerHTML = `
+        <span>
+          <input type="checkbox" value="${l.code}" checked />
+          <strong style="margin-left:6px;">${l.name}</strong>
+        </span>
+        <span class="meta">${l.count} items</span>
+      `;
+      speakingHost.appendChild(row);
+    }
   }
   if (toneHost) {
     for (const l of LESSONS.filter((lesson) => isToneLessonCode(lesson.code))) {
